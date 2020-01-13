@@ -1,12 +1,13 @@
 {
   "name": "choose-lunch",
-  "version": "0.9.0",
-  "author": "tshan",
+  "version": "1.0.0",
+  "author": "Marcus Han (tshan@byulsoft.com)",
   "description": "in order to live",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
@@ -17,6 +18,10 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "npm run lint:fix"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/marcustshan/ChooseLunch.git"
   },
   "build": {
     "productName": "Choose Lunch",
