@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-unused-expressions */
 
-// settings.js
 const state = {
   // baseUrl: 'http://192.168.14.192:8090',
   baseUrl: '/',

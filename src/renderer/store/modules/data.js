@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-unused-expressions */
 
-// user.js
 const state = {
   restaurants: [],
   todayChoices: []

@@ -38,10 +38,6 @@
     },
     mounted () {
       this.showImageIndex = Math.floor(Math.random() * 10) + 1
-
-      this.$axios.get('/getUser', {}).then((response) => {
-        this.$store.dispatch('setUserInfo', response.data)
-      })
     }
   }
 </script>
