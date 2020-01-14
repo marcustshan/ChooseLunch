@@ -1,6 +1,8 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import { autoUpdater } from 'electron-updater'
+import logger from 'electron-log'
 
 /**
  * Set `__static` path to static files in production
@@ -34,7 +36,19 @@ function createWindow () {
     mainWindow = null
   })
 
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
+
+  ipcMain.on('check_update', (event) => {
+    if (process.env.NODE_ENV === 'production') {
+      autoUpdater.checkForUpdates()
+    }
+  })
+
+  ipcMain.on('update_completed', (event) => {
+    if (process.env.NODE_ENV === 'production') {
+      autoUpdater.quitAndInstall()
+    }
+  })
 }
 
 app.on('ready', createWindow)
@@ -58,15 +72,29 @@ app.on('activate', () => {
  * support auto updating. Code Signing with a valid certificate is required.
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
  */
+autoUpdater.channel = 'latest'
+autoUpdater.allowDowngrade = false
 
-/*
-import { autoUpdater } from 'electron-updater'
+autoUpdater.logger = logger
+autoUpdater.logger.transports.file.level = 'silly'
+autoUpdater.autoDownload = true
 
+autoUpdater.on('checking-for-update', (event) => {
+  mainWindow.webContents.send('checking_for_update', event)
+})
+autoUpdater.on('update-available', () => {
+  mainWindow.webContents.send('update_available')
+})
+autoUpdater.on('update-not-available', () => {
+  mainWindow.webContents.send('update_not_available')
+})
 autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
+  mainWindow.webContents.send('update_downloaded')
 })
-
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+autoUpdater.on('download-progress', (progressObject) => {
+  mainWindow.webContents.send('download_progress', JSON.stringify(progressObject))
 })
- */
+autoUpdater.on('error', (error) => {
+  autoUpdater.logger.debug(error)
+  mainWindow.webContents.send('update_error', error)
+})
