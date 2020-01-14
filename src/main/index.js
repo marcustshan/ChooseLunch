@@ -36,7 +36,7 @@ function createWindow () {
     mainWindow = null
   })
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   ipcMain.on('check_update', (event) => {
     if (process.env.NODE_ENV === 'production') {
@@ -76,7 +76,7 @@ autoUpdater.channel = 'latest'
 autoUpdater.allowDowngrade = false
 
 autoUpdater.logger = logger
-autoUpdater.logger.transports.file.level = 'silly'
+autoUpdater.logger.transports.file.level = 'error'
 autoUpdater.autoDownload = true
 
 autoUpdater.on('checking-for-update', (event) => {

@@ -31,7 +31,6 @@
     mounted () {
       ipcRenderer.on('checking_for_update', () => {
         this.updating = true
-        console.log('checking_for_update')
       })
       ipcRenderer.on('update_available', () => {
         this.updating = false
@@ -54,6 +53,7 @@
         this.alert('업데이트 중 오류가 발생했습니다.\n' + error)
       })
 
+      ipcRenderer.send('check_update')
       setInterval(() => {
         if (this.updating) {
           return
