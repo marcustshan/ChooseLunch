@@ -153,6 +153,7 @@
         formData.append('date', this.$moment().format('YYYYMMDDHHmmss'))
         formData.append('fileName', fileName)
         this.$axios.post('/upload', formData).then((response) => {
+          response.data.own = true
           this.messages.push(response.data)
         })
       },
