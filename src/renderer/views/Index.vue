@@ -59,7 +59,7 @@
                 {{ message.name }}
               </div>
               <div class="message" :class="message.isImage ? 'imageMessage' : ''">
-                <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="'/image/' + message.fileName" />
+                <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="baseUrl + '/image/' + message.fileName" />
                 <p v-else>
                   {{ message.message }}
                 </p>
@@ -105,6 +105,9 @@
       }
     },
     computed: {
+      baseUrl () {
+        return this.$store.getters.baseUrl
+      },
       user () {
         return this.$store.getters.userInfo
       },
@@ -117,7 +120,8 @@
     },
     methods: {
       fnShowImage (fileName) {
-        this.imageUrl = '/image/' + fileName
+        this.imageUrl = this.baseUrl + '/image/' + fileName
+        console.log(this.imageUrl)
         this.$nextTick(() => {
           this.fnShowPopup()
         })

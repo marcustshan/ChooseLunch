@@ -50,7 +50,7 @@
       })
       ipcRenderer.on('update_error', (error) => {
         this.updating = false
-        this.alert('업데이트 중 오류가 발생했습니다.\n' + error)
+        this.alert('업데이트 중 오류가 발생했습니다.\n' + error.toString())
       })
 
       ipcRenderer.send('check_update')
