@@ -23,6 +23,9 @@ const getters = {
 }
 
 const actions = {
+  setBaseUrl(context, value) {
+    context.commit('setBaseUrl', value)
+  },
   setNowLoading(context, value) {
     context.commit('setNowLoading', value)
   },

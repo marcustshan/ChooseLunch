@@ -58,9 +58,11 @@
               <div class="name" v-if="!message.own">
                 {{ message.name }}
               </div>
-              <div class="message">
-                {{ message.message }}
-                <br>
+              <div class="message" :class="message.isImage ? 'imageMessage' : ''">
+                <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="'/image/' + message.fileName" />
+                <p v-else>
+                  {{ message.message }}
+                </p>
                 <div class="time">
                   {{ $moment(message.date, 'YYYYMMDDHHmmss').format('HH:mm:ss') }}
                 </div>
@@ -70,14 +72,14 @@
         </ul>
       </div>
       <div class="chat_input_container">
-        <input class="chat_input" type="text" v-model="sendMessage" @keyup.enter="fnSendMessage" placeholder="Enter 키로 전송" />
+        <input @paste="fnPaste" class="chat_input" type="text" v-model="sendMessage" @keyup.enter="fnSendMessage" placeholder="Enter 키로 전송" />
       </div>
     </div>
 
     <div id="layer" class="layer" v-show="showPopup">
       <div class="close" @click="fnClosePopup"></div>
       <div class="layer_body">
-        <img :src="menuImageUrl" />
+        <img :src="imageUrl" />
       </div>
     </div>
   </div>
@@ -89,8 +91,8 @@
     data () {
       return {
         scraper: {},
-        menuImageUrl: '',
-        menuImageUrlMap: {},
+        imageUrl: '',
+        imageUrlMap: {},
         flattenRestaurnts: [],
         restaurants: {},
         selectedRestaurant: {},
@@ -114,6 +116,42 @@
       }
     },
     methods: {
+      fnShowImage (fileName) {
+        this.imageUrl = '/image/' + fileName
+        this.$nextTick(() => {
+          this.fnShowPopup()
+        })
+      },
+      fnPaste () {
+        const clipboard = require('electron').clipboard
+        let availableFormats = clipboard.availableFormats()
+        let existImage = false
+        availableFormats.some((format) => {
+          if (format.indexOf('image') > -1) {
+            existImage = true
+            return existImage
+          }
+        })
+
+        if (!existImage) {
+          return
+        }
+
+        let imageFile = clipboard.readImage()
+        let imageData = imageFile.toDataURL().replace(/^data:image\/png;base64,/, '')
+
+        let formData = new FormData()
+        let fileName = this.user.id + '_' + this.$moment().format('YYYYMMDDHHmmssSSS') + '.png'
+        formData.append('image', imageData)
+        formData.append('id', this.user.id)
+        formData.append('name', this.user.name)
+        formData.append('isImage', true)
+        formData.append('date', this.$moment().format('YYYYMMDDHHmmss'))
+        formData.append('fileName', fileName)
+        this.$axios.post('/upload', formData).then((response) => {
+          this.messages.push(response.data)
+        })
+      },
       fnGetChosenUsers (seq) {
         let chosenUsers = this._.filter(this.todayChoices, (choice) => { return choice.seq === seq })
         let returnString = ''
@@ -228,8 +266,8 @@
         })
       },
       fnShowBuffet (instagramID) {
-        if (this.menuImageUrlMap[instagramID]) {
-          this.menuImageUrl = this.menuImageUrlMap[instagramID]
+        if (this.imageUrlMap[instagramID]) {
+          this.imageUrl = this.imageUrlMap[instagramID]
           this.$nextTick(() => {
             this.fnShowPopup()
           })
@@ -249,8 +287,8 @@
             if (latestMedia.text.indexOf('저녁') > -1) {
               latestMedia = response.medias[1]
             }
-            this.menuImageUrl = latestMedia.display_url
-            this.menuImageUrlMap[instagramID] = this.menuImageUrl
+            this.imageUrl = latestMedia.display_url
+            this.imageUrlMap[instagramID] = this.imageUrl
             this.$nextTick(() => {
               this.fnShowPopup()
             })
@@ -311,6 +349,8 @@
   div.chat_input_container input.chat_input {width: 100%; height: 40px; line-height: 40px; border: 1px solid #ccc; padding: 5px;}
   li.chat_item {clear: both;}
   div.message { margin-right: 25px; margin-bottom: 10px; width: fit-content; padding: 10px; position: relative; border-radius: .4em; user-select: text; }
+  div.imageMessage { max-height: 200px; }
+  div.imageMessage img { width: 100%; object-fit: cover; cursor: pointer; }
   div.chat_line.another div.message { float: left; background: #fff; margin-top: 16px; }
   div.chat_line.own div.message { float: right; background: #f5ec78; }
   div.chat_line.another div.message:after { content: ''; position: absolute; top: 0; left: 22px; width: 0; height: 0; border: 17px solid transparent; border-bottom-color: #fff; border-top: 0; border-left: 0; margin-left: 0; margin-top: -16px; }

@@ -53,6 +53,9 @@ const service = axios.create({
 // 요청(request) 인터셉터
 service.interceptors.request.use(
   (config) => {
+    if (config.url.indexOf('upload') > -1) {
+      config.headers['Content-type'] = 'multipart/form-data'
+    }
     store.dispatch('setNowLoading', true)
     return config
   },
