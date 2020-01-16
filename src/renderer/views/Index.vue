@@ -354,7 +354,7 @@
   li.chat_item {clear: both;}
   div.message { margin-right: 25px; margin-bottom: 10px; width: fit-content; padding: 10px; position: relative; border-radius: .4em; user-select: text; }
   div.imageMessage { max-height: 200px; }
-  div.imageMessage img { width: 100%; object-fit: cover; cursor: pointer; }
+  div.imageMessage img { max-height: 160px; max-width: 100%; object-fit: cover; cursor: pointer; }
   div.chat_line.another div.message { float: left; background: #fff; margin-top: 16px; }
   div.chat_line.own div.message { float: right; background: #f5ec78; }
   div.chat_line.another div.message:after { content: ''; position: absolute; top: 0; left: 22px; width: 0; height: 0; border: 17px solid transparent; border-bottom-color: #fff; border-top: 0; border-left: 0; margin-left: 0; margin-top: -16px; }
