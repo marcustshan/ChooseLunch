@@ -121,7 +121,6 @@
     methods: {
       fnShowImage (fileName) {
         this.imageUrl = this.baseUrl + '/image/' + fileName
-        console.log(this.imageUrl)
         this.$nextTick(() => {
           this.fnShowPopup()
         })
@@ -155,6 +154,10 @@
         this.$axios.post('/upload', formData).then((response) => {
           response.data.own = true
           this.messages.push(response.data)
+          this.$nextTick(() => {
+            let chatDiv = document.getElementById('chatContent')
+            chatDiv.scrollTop = chatDiv.scrollHeight
+          })
         })
       },
       fnGetChosenUsers (seq) {
@@ -302,6 +305,7 @@
       },
       fnInitEventBus () {
         this.EventBus.on('ADD_MESSAGE', (message) => {
+          message.own = message.id === this.user.id
           this.messages.push(message)
           this.$nextTick(() => {
             let chatDiv = document.getElementById('chatContent')
@@ -354,6 +358,7 @@
   div.chat_input_container input.chat_input {width: 100%; height: 40px; line-height: 40px; border: 1px solid #ccc; padding: 5px;}
   li.chat_item {clear: both;}
   div.message { margin-right: 25px; margin-bottom: 10px; width: fit-content; padding: 10px; position: relative; border-radius: .4em; user-select: text; }
+  div.message p {word-break: break-all;}
   div.imageMessage { max-height: 200px; }
   div.imageMessage img { max-height: 160px; max-width: 100%; object-fit: cover; cursor: pointer; }
   div.chat_line.another div.message { float: left; background: #fff; margin-top: 16px; }
