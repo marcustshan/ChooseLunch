@@ -17,7 +17,12 @@
         <img v-if="showImageIndex === 10" src="~@/assets/images/pengsoo/10.jpg" alt="pengsoo" />
       </div>
       <div class="bottom">
-        <button @click="fnMoveToMain">가시죠</button>
+        <button @click="fnMoveToMain" v-if="isLogged">
+          가시죠
+        </button>
+        <div v-else>
+          <h3>서버가 안켜져 있어요.....</h3>
+        </div>
       </div>
     </div>
   </div>
@@ -29,6 +34,11 @@
     data () {
       return {
         showImageIndex: 0
+      }
+    },
+    computed: {
+      isLogged () {
+        return this.$store.getters.userInfo && this.$store.getters.userInfo.id
       }
     },
     methods: {

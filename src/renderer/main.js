@@ -88,6 +88,7 @@ Vue.prototype.deepCopy = (target) => {
 
 service.get('/getUser', {}).then((response) => {
   store.dispatch('setUserInfo', response.data)
+}).finally(() => {
   /* eslint-disable no-new */
   window.rootVm = new Vue({
     components: { App },
