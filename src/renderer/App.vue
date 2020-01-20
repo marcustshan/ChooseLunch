@@ -52,6 +52,14 @@
         this.updating = false
         this.alert('업데이트 중 오류가 발생했습니다.\n' + error.toString())
       })
+      ipcRenderer.on('smoke_request', () => {
+        console.log('ㅋㅋㅋㅋㅋ 담배 피자구요')
+
+        if (Notification.permission === 'granted') {
+          let notification = new Notification('Hi there!')
+          console.log(notification)
+        }
+      })
 
       ipcRenderer.send('check_update')
       setInterval(() => {
