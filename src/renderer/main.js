@@ -73,7 +73,7 @@ service.interceptors.response.use(
   },
   (error) => {
     store.dispatch('setNowLoading', false)
-    window.rootVm.alert(error.message)
+    alert(error.message, 'Choose Lunch')
     return Promise.reject(error)
   }
 )

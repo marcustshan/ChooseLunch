@@ -36,13 +36,16 @@ function createWindow () {
     mainWindow = null
   })
 
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   globalShortcut.register('f5', () => {
     mainWindow.reload()
   })
   globalShortcut.register('CommandOrControl+R', () => {
     mainWindow.reload()
+  })
+  globalShortcut.register('Alt+S', () => {
+    mainWindow.webContents.send('smoke_request')
   })
 
   ipcMain.on('check_update', (event) => {
