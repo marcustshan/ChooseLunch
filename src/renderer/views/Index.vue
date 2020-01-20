@@ -50,8 +50,9 @@
       </ul>
     </div>
 
-    <div class="chat_container">
+    <div class="chat_container" id="chatContainer">
       <div id="chatContent" class="chat_content">
+        <div v-show="dragging" class="dragging_dim"></div>
         <ul>
           <li class="chat_item" v-for="(message, index) in messages" v-bind:key="index">
             <div class="chat_line" :class="message.own ? 'own' : 'another'">
@@ -101,7 +102,9 @@
         sendMessage: '',
         messages: [],
         showPopup: false,
-        showTooltip: false
+        showTooltip: false,
+        dragging: false,
+        draggingCount: 0
       }
     },
     computed: {
@@ -119,28 +122,41 @@
       }
     },
     methods: {
+      fnInitDropEvent () {
+        let holder = document.getElementById('chatContent')
+        holder.ondragover = (e) => {
+          this.draggingCount++
+          this.dragging = true
+          return false
+        }
+        holder.ondragleave = (e) => {
+          this.draggingCount--
+          if (this.draggingCount === 0) {
+            this.dragging = false
+          }
+          return false
+        }
+        holder.ondragend = () => {
+          return false
+        }
+        holder.ondrop = (e) => {
+          e.preventDefault()
+          this.dragging = false
+          const nativeImage = require('electron').nativeImage
+          for (let f of e.dataTransfer.files) {
+            console.log(f.path)
+            let imageInstance = nativeImage.createFromPath(f.path)
+            this.fnSendImage(imageInstance)
+          }
+        }
+      },
       fnShowImage (fileName) {
         this.imageUrl = this.baseUrl + '/image/' + fileName
         this.$nextTick(() => {
           this.fnShowPopup()
         })
       },
-      fnPaste () {
-        const clipboard = require('electron').clipboard
-        let availableFormats = clipboard.availableFormats()
-        let existImage = false
-        availableFormats.some((format) => {
-          if (format.indexOf('image') > -1) {
-            existImage = true
-            return existImage
-          }
-        })
-
-        if (!existImage) {
-          return
-        }
-
-        let imageFile = clipboard.readImage()
+      fnSendImage (imageFile) {
         let imageData = imageFile.toDataURL().replace(/^data:image\/png;base64,/, '')
 
         let formData = new FormData()
@@ -159,6 +175,24 @@
             chatDiv.scrollTop = chatDiv.scrollHeight
           })
         })
+      },
+      fnPaste () {
+        const clipboard = require('electron').clipboard
+        let availableFormats = clipboard.availableFormats()
+        let existImage = false
+        availableFormats.some((format) => {
+          if (format.indexOf('image') > -1) {
+            existImage = true
+            return existImage
+          }
+        })
+
+        if (!existImage) {
+          return
+        }
+
+        let imageFile = clipboard.readImage()
+        this.fnSendImage(imageFile)
       },
       fnGetChosenUsers (seq) {
         let chosenUsers = this._.filter(this.todayChoices, (choice) => { return choice.seq === seq })
@@ -339,6 +373,7 @@
       this.fnGetRestaurants()
       this.fnGetTodayChoices()
       this.fnGetLatestChoices()
+      this.fnInitDropEvent()
     }
   }
 </script>
@@ -353,7 +388,8 @@
 
   /* 채팅 영역 */
   div.chat_container {width: 30%; height: 100%; float: left; overflow-y: auto; padding-left: 10px;}
-  div.chat_content{height: calc(100% - 61px); max-height: calc(100% - 61px); overflow-y: auto; border-bottom: 1px solid #ccc;}
+  div.chat_content{height: calc(100% - 61px); max-height: calc(100% - 61px); overflow-y: auto; border-bottom: 1px solid #ccc; position: relative;}
+  div.chat_content div.dragging_dim { position: absolute; width: 100%; height: 100%; background-color: #2364b1; opacity: 0.5; }
   div.chat_input_container {height: 60px; padding-top: 10px;}
   div.chat_input_container input.chat_input {width: 100%; height: 40px; line-height: 40px; border: 1px solid #ccc; padding: 5px;}
   li.chat_item {clear: both;}

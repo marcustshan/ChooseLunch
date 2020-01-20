@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import logger from 'electron-log'
 
@@ -37,6 +37,13 @@ function createWindow () {
   })
 
   // mainWindow.webContents.openDevTools()
+
+  globalShortcut.register('f5', () => {
+    mainWindow.reload()
+  })
+  globalShortcut.register('CommandOrControl+R', () => {
+    mainWindow.reload()
+  })
 
   ipcMain.on('check_update', (event) => {
     if (process.env.NODE_ENV === 'production') {
