@@ -36,8 +36,13 @@ function createWindow () {
     mainWindow = null
   })
 
-  mainWindow.webContents.openDevTools()
-
+  globalShortcut.register('CommandOrControl+Shift+D', () => {
+    if (mainWindow.webContents.isDevToolsOpened()) {
+      mainWindow.webContents.closeDevTools()
+    } else {
+      mainWindow.webContents.openDevTools()
+    }
+  })
   globalShortcut.register('f5', () => {
     mainWindow.reload()
   })
