@@ -3,8 +3,8 @@
 /* eslint-disable no-unused-expressions */
 
 const state = {
-  baseUrl: 'http://192.168.14.192:8090',
-  // baseUrl: '',
+  // baseUrl: 'http://192.168.14.192:8090',
+  baseUrl: '',
   timeout: 15000,
   nowLoading: false,
   showLayerPopup: false

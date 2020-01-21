@@ -37,6 +37,9 @@ function createWindow () {
   })
 
   globalShortcut.register('CommandOrControl+Shift+D', () => {
+    if (!mainWindow.isFocused()) {
+      return
+    }
     if (mainWindow.webContents.isDevToolsOpened()) {
       mainWindow.webContents.closeDevTools()
     } else {
@@ -44,12 +47,21 @@ function createWindow () {
     }
   })
   globalShortcut.register('f5', () => {
+    if (!mainWindow.isFocused()) {
+      return
+    }
     mainWindow.reload()
   })
   globalShortcut.register('CommandOrControl+R', () => {
+    if (!mainWindow.isFocused()) {
+      return
+    }
     mainWindow.reload()
   })
   globalShortcut.register('Alt+S', () => {
+    if (!mainWindow.isFocused()) {
+      return
+    }
     mainWindow.webContents.send('smoke_request')
   })
 
