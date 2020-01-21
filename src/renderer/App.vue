@@ -83,10 +83,11 @@
 
         this.$socket.on('smoke', (data) => {
           this.fnShowNoti(data.name + ' : 담배 피러 가실까요?', true)
+          this.fnShowSmokeRequestPopup()
         })
 
         this.$socket.on('smokeAnswer', (data) => {
-          this.fnShowNoti(data.name + ' : ' + data.reply, true)
+          this.fnShowNoti(data.name + ' : ' + data.msg, true)
         })
       },
       fnShowSmokeRequestPopup () {
