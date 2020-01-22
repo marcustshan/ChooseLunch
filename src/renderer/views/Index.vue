@@ -12,6 +12,21 @@
             </span>
           </li>
         </ul>
+
+        <div class="users_title">
+          접속자 : 
+        </div>
+        <div class="users" @mouseenter="showUserList = true" @mouseleave="showUserList = false">
+          {{ _.countBy(users, (user) => {return user.connected}).true }}
+        </div>
+        <div class="user_list" v-show="showUserList">
+          <ul>
+            <li v-for="user in users" v-bind:key="user.id">
+              <div class="network_status" :class="user.connected ? 'on' : 'off'"></div>
+              {{ user.name }}
+            </li>
+          </ul>
+        </div>
       </div>
       <ul>
         <li class="restaurant_card" v-for="(value, name) in restaurants" v-bind:key="name">
@@ -91,6 +106,8 @@
     name: 'index',
     data () {
       return {
+        users: [],
+        showUserList: false,
         scraper: {},
         imageUrl: '',
         imageUrlMap: {},
@@ -122,6 +139,12 @@
       }
     },
     methods: {
+      fnGetUsers () {
+        this.$axios.get('/getUsers', {}).then((response) => {
+          this.users = []
+          this.users.push(...response.data)
+        })
+      },
       fnInitDropEvent () {
         let holder = document.getElementById('chatContent')
         holder.ondragover = (e) => {
@@ -144,7 +167,6 @@
           this.dragging = false
           const nativeImage = require('electron').nativeImage
           for (let f of e.dataTransfer.files) {
-            console.log(f.path)
             let imageInstance = nativeImage.createFromPath(f.path)
             this.fnSendImage(imageInstance)
           }
@@ -168,6 +190,7 @@
         formData.append('date', this.$moment().format('YYYYMMDDHHmmss'))
         formData.append('fileName', fileName)
         this.$axios.post('/upload', formData).then((response) => {
+          this.$socket.emit('chat', response.data)
           response.data.own = true
           this.messages.push(response.data)
           this.$nextTick(() => {
@@ -351,6 +374,11 @@
           this.todayChoices = []
           this.todayChoices.push(...choices)
         })
+
+        this.EventBus.on('USERS_CHANGED', (users) => {
+          this.users = []
+          this.users.push(...users)
+        })
       },
       fnInitSocket () {
         this.$socket.off('receiveChat')
@@ -361,6 +389,11 @@
         this.$socket.off('chosen')
         this.$socket.on('chosen', (data) => {
           this.EventBus.emit('REFRESH_CHOICES', data)
+        })
+
+        this.$socket.off('usersChanged')
+        this.$socket.on('usersChanged', (data) => {
+          this.EventBus.emit('USERS_CHANGED', data)
         })
       }
     },
@@ -374,6 +407,7 @@
       this.fnGetTodayChoices()
       this.fnGetLatestChoices()
       this.fnInitDropEvent()
+      this.fnGetUsers()
     }
   }
 </script>
@@ -382,9 +416,19 @@
   div.restaurants {width: 70%; height: 100%; float: left; overflow-y: auto; border-right: 1px solid #ccc;}
 
   div.restaurants div.header { height: 50px; }
+
+  /* 최근 식사 이력 영역 */
+  div.latest {position:relative;}
   li.latest_item {display: inline-block; margin-left: 15px;}
   li.latest_item span {font-weight: 600;}
   li.latest_item span.latest_restaurant {color: #7b11bb;}
+  div.users_title {position: absolute; right: 67px; top: 6px; color: #1a7b00; font-weight: 600;}
+  div.user_list {position: absolute; right: 8px; top: 36px;}
+  div.user_list li {position: relative; padding-left: 17px; padding-top: 7px; border-bottom: 1px solid #ccc;}
+  div.user_list div.network_status { position: absolute; top: 12px; left: 0px; width: 12px; height: 12px; background-color: #777; border-radius: 6px; }
+  div.user_list div.network_status.on { background-color:#2ac700 }
+  div.user_list div.network_status.off { background-color:#c22d10 }
+  /* 최근 식사 이력 영역 */
 
   /* 채팅 영역 */
   div.chat_container {width: 30%; height: 100%; float: left; overflow-y: auto; padding-left: 10px;}

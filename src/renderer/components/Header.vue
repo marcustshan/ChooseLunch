@@ -75,9 +75,8 @@ header div.time_info {z-index: 3; position: absolute; width: 100%; height: 60px;
 header div.time_info .sat {color: #1162f8;}
 header div.time_info .sun {color: #fa0a1e;}
 
+div.app_version { position: absolute; top: 0; right: 45px; width: 12px; line-height: 60px; height: 60px; }
 div.network_status { position: absolute; top: 24px; right: 80px; width: 12px; height: 12px; background-color: #777; border-radius: 6px; }
-div.app_version { position: absolute; top: 0; right: 40px; width: 12px; line-height: 60px; height: 60px; }
-
 div.network_status.on { background-color:#2ac700 }
 div.network_status.off { background-color:#c22d10 }
 </style>
