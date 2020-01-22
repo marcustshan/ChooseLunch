@@ -167,8 +167,21 @@
           this.dragging = false
           const nativeImage = require('electron').nativeImage
           for (let f of e.dataTransfer.files) {
-            let imageInstance = nativeImage.createFromPath(f.path)
-            this.fnSendImage(imageInstance)
+            if (f.path.endsWith('.gif')) {
+              let reader = new FileReader()
+              reader.readAsBinaryString(f)
+              reader.onload = () => {
+                let imageData = btoa(reader.result)
+                this.fnSendImage(imageData)
+              }
+              reader.onerror = () => {
+                console.log('there are some problems')
+              }
+            } else {
+              let imageInstance = nativeImage.createFromPath(f.path)
+              let imageData = imageInstance.toDataURL().replace(/^data:image\/png;base64,/, '')
+              this.fnSendImage(imageData)
+            }
           }
         }
       },
@@ -178,9 +191,7 @@
           this.fnShowPopup()
         })
       },
-      fnSendImage (imageFile) {
-        let imageData = imageFile.toDataURL().replace(/^data:image\/png;base64,/, '')
-
+      fnSendImage (imageData) {
         let formData = new FormData()
         let fileName = this.user.id + '_' + this.$moment().format('YYYYMMDDHHmmssSSS') + '.png'
         formData.append('image', imageData)
@@ -215,7 +226,8 @@
         }
 
         let imageFile = clipboard.readImage()
-        this.fnSendImage(imageFile)
+        let imageData = imageFile.toDataURL().replace(/^data:image\/png;base64,/, '')
+        this.fnSendImage(imageData)
       },
       fnGetChosenUsers (seq) {
         let chosenUsers = this._.filter(this.todayChoices, (choice) => { return choice.seq === seq })
