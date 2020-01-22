@@ -82,13 +82,11 @@
         })
 
         this.$socket.on('smoke', (data) => {
-          console.log('smoke', data)
           this.fnShowNoti(data.name + ' : 담배 피러 가실까요?', true)
           this.fnShowSmokeRequestPopup()
         })
 
         this.$socket.on('smokeAnswer', (data) => {
-          console.log('smokeAnswer', data)
           this.fnShowNoti(data.name + ' : ' + data.msg, true)
         })
       },
@@ -106,25 +104,29 @@
       },
       fnShowNoti (msg, flashIcon) {
         let notification
-        if (Notification.permission !== 'denied') {
-          Notification.requestPermission(function (permission) {
+        if (Notification.permission !== 'granted') {
+          Notification.requestPermission((permission) => {
             if (permission !== 'granted') {
               return false
             }
           })
         }
 
-        notification = new Notification(msg)
-
         let win = require('electron').remote.getCurrentWindow()
-        if (flashIcon) {
-          win.once('focus', () => win.flashFrame(false))
-          win.flashFrame(true)
-        }
 
+        notification = new Notification(msg)
         notification.onclick = () => {
           win.focus()
         }
+
+        if (flashIcon) {
+          this.fnFlashFrame()
+        }
+      },
+      fnFlashFrame () {
+        let win = require('electron').remote.getCurrentWindow()
+        win.once('focus', () => win.flashFrame(false))
+        win.flashFrame(true)
       }
     },
     mounted () {
