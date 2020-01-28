@@ -107,7 +107,7 @@
     data () {
       return {
         users: [],
-        showUserList: true,
+        showUserList: false,
         scraper: {},
         imageUrl: '',
         imageUrlMap: {},
