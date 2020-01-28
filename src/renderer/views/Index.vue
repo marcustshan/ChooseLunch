@@ -28,7 +28,7 @@
           </ul>
         </div>
       </div>
-      <ul>
+      <ul class="restaurant_card_list">
         <li class="restaurant_card" v-for="(value, name) in restaurants" v-bind:key="name">
           <div class="category">
             {{ name }}
@@ -107,7 +107,7 @@
     data () {
       return {
         users: [],
-        showUserList: false,
+        showUserList: true,
         scraper: {},
         imageUrl: '',
         imageUrlMap: {},
@@ -435,8 +435,8 @@
   li.latest_item span {font-weight: 600;}
   li.latest_item span.latest_restaurant {color: #7b11bb;}
   div.users_title {position: absolute; right: 67px; top: 6px; color: #1a7b00; font-weight: 600;}
-  div.user_list {position: absolute; right: 8px; top: 36px;}
-  div.user_list li {position: relative; padding-left: 17px; padding-top: 7px; border-bottom: 1px solid #ccc;}
+  div.user_list {border: 1px solid #666; border-radius: 10px; position: absolute; right: 8px; top: 36px; z-index: 99; background-color: #f3f3f3; padding: 5px 10px;}
+  div.user_list li {position: relative; padding-left: 17px; padding-top: 7px;}
   div.user_list div.network_status { position: absolute; top: 12px; left: 0px; width: 12px; height: 12px; background-color: #777; border-radius: 6px; }
   div.user_list div.network_status.on { background-color:#2ac700 }
   div.user_list div.network_status.off { background-color:#c22d10 }
@@ -461,6 +461,7 @@
   /* 채팅 영역 */
 
   /* 식당 영역 */
+  ul.restaurant_card_list {margin-top: 30px;}
   li.restaurant_card { display: inline-block; width: 300px; height: auto; background-color: #fff; border: 1px solid #666; border-radius: 10px; padding: 10px; margin-left: 15px; margin-top: 15px; }
   li.restaurant_card div.category { border-bottom: 1px solid #ccc; font-weight: 600; font-size: 18px; position: relative; height: 40px; line-height: 40px; }
   div.users { width: 55px; height: 30px; line-height: 30px; border: 1px solid #666; border-radius: 10px; background-color: #f1f1f1; position: absolute; right: 5px; top: 2px; background-image: url('../assets/images/user.png'); background-size: 16px 16px; background-repeat: no-repeat; background-position: 7px 5px; text-align: center; text-indent: 20px; cursor: pointer; }
