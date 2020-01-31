@@ -388,7 +388,8 @@
         })
 
         this.EventBus.on('USERS_CHANGED', (users) => {
-          this.fnGetUsers()
+          this.users = []
+          this.users.push(...users)
         })
       },
       fnInitSocket () {
