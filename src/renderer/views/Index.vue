@@ -357,8 +357,9 @@
           this.$store.dispatch('setNowLoading', false)
 
           let latestMedia = response.medias[0]
-          let todayString = this.$moment().format('DD') + '일'
-          if (latestMedia.text.indexOf(todayString) < 0) {
+          let todayStringDD = this.$moment().format('DD') + '일'
+          let todayStringD = this.$moment().format('D') + '일'
+          if (latestMedia.text.indexOf(todayStringD) < 0 && latestMedia.text.indexOf(todayStringDD) < 0) {
             this.alert('아직 오늘 메뉴가 올라오지 않았습니다.')
           } else {
             if (latestMedia.text.indexOf('저녁') > -1) {
