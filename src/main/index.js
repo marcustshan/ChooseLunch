@@ -3,6 +3,7 @@
 import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import logger from 'electron-log'
+import { Settings } from './settings.js'
 
 /**
  * Set `__static` path to static files in production
@@ -17,17 +18,47 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
+const settings = new Settings({
+  configName: 'settings',
+  defaults: {
+    windowSize: { width: 1700, height: 800 }
+  }
+})
+
 function createWindow () {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
     useContentSize: true,
-    width: 1700,
-    height: 800,
-    minWidth: 800,
-    minHeight: 500,
+    width: settings.get('windowSize').width,
+    height: settings.get('windowSize').height,
+    minWidth: 1000,
+    minHeight: 600,
     webSecurity: false
+  })
+
+  if (settings.get('windowMaximized')) {
+    mainWindow.maximize()
+  }
+
+  mainWindow.on('resize', () => {
+    let { width, height } = mainWindow.getBounds()
+    settings.set('windowSize', { width, height })
+  })
+  mainWindow.on('maximize', () => {
+    let { width, height } = mainWindow.getBounds()
+    settings.set('windowSize', { width, height })
+    settings.set('windowMaximized', true)
+  })
+  mainWindow.on('unmaximize', () => {
+    let { width, height } = mainWindow.getBounds()
+    settings.set('windowSize', { width, height })
+    settings.set('windowMaximized', false)
+  })
+  mainWindow.on('restore', () => {
+    let { width, height } = mainWindow.getBounds()
+    settings.set('windowSize', { width, height })
   })
 
   mainWindow.loadURL(winURL)

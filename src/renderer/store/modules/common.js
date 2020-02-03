@@ -3,8 +3,8 @@
 /* eslint-disable no-unused-expressions */
 
 const state = {
-  baseUrl: 'http://192.168.14.192:8090',
-  // baseUrl: '',
+  prod_baseUrl: 'http://192.168.14.192:8090',
+  dev_baseUrl: '',
   timeout: 15000,
   nowLoading: false,
   showLayerPopup: false
@@ -12,7 +12,7 @@ const state = {
 
 const getters = {
   baseUrl: state => {
-    return state.baseUrl
+    return process.env.WEBPACK_DEV_SERVER ? state.dev_baseUrl : state.prod_baseUrl
   },
   nowLoading: state => {
     return state.nowLoading
