@@ -81,6 +81,7 @@ function createWindow () {
       mainWindow.webContents.openDevTools()
     }
   })
+  /*
   globalShortcut.register('f5', () => {
     if (!mainWindow.isFocused()) {
       return
@@ -99,6 +100,7 @@ function createWindow () {
     }
     mainWindow.webContents.send('smoke_request')
   })
+  */
 
   ipcMain.on('check_update', (event) => {
     if (process.env.NODE_ENV === 'production') {

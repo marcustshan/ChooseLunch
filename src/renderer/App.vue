@@ -74,14 +74,6 @@
         }, 60000)
       },
       fnInitSmokeRequest () {
-        ipcRenderer.on('smoke_request', () => {
-          if (!this.user.isSmoker) {
-            return
-          }
-          this.$socket.emit('smoke', { id: this.user.id, name: this.user.name })
-          this.fnShowNoti('잠시만 기다려주세요...', false)
-        })
-
         this.$socket.on('smoke', (data) => {
           this.fnShowNoti(data.name + ' : 담배 피러 가실까요?', true)
           this.fnShowSmokeRequestPopup()
@@ -132,6 +124,22 @@
     mounted () {
       this.fnInitUpdateChecker()
       this.fnInitSmokeRequest()
+
+      this._keyListener = (e) => {
+        if (e.key.toLowerCase() === 'r' && (e.ctrlKey || e.metaKey)) {
+          require('electron').remote.getCurrentWindow().reload()
+        } else if (e.key === 'F5') {
+          require('electron').remote.getCurrentWindow().reload()
+        } else if (e.key.toLowerCase() === 's' && e.altKey) {
+          if (!this.user.isSmoker) {
+            return
+          }
+          this.$socket.emit('smoke', { id: this.user.id, name: this.user.name })
+          this.fnShowNoti('잠시만 기다려주세요...', false)
+        }
+      }
+
+      document.addEventListener('keydown', this._keyListener.bind(this))
     }
   }
 </script>
