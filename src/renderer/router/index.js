@@ -13,25 +13,25 @@ const VueRouter = new Router({
       component: require('@/views/Index').default
     },
     {
-      path: '/login',
-      name: 'login',
-      component: require('@/views/Login').default
+      path: '/lunch',
+      name: 'lunch',
+      component: require('@/views/Lunch').default
     },
     {
       path: '*',
-      redirect: '/login'
+      redirect: '/index'
     }
   ]
 })
 
 VueRouter.beforeEach((to, from, next) => {
   /*
-  if (to.name.indexOf('login') < 0 && !store.getters.isLogged) {
-    next({ path: '/login' })
+  if (to.name.indexOf('index') < 0 && !store.getters.isLogged) {
+    next({ path: '/index' })
     return
   }
 
-  if (to.path.indexOf('/index') > -1) {
+  if (to.path.indexOf('/lunch') > -1) {
     next()
     return
   }
