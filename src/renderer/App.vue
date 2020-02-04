@@ -114,7 +114,6 @@
         }
 
         let win = require('electron').remote.getCurrentWindow()
-
         notification = new Notification(msg)
         notification.onclick = () => {
           win.focus()

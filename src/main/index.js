@@ -38,6 +38,10 @@ function createWindow () {
     webSecurity: false
   })
 
+  const path = require('path')
+  const nativeImage = require('electron').nativeImage
+  mainWindow.setIcon(nativeImage.createFromPath(path.join(__dirname, '../renderer/assets/icons/win/icon.ico')))
+
   if (settings.get('windowMaximized')) {
     mainWindow.maximize()
   }
