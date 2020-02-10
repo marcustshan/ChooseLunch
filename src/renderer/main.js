@@ -47,12 +47,16 @@ const service = axios.create({
     Accept: 'application/json',
     'Content-type': 'application/json;charset=utf-8'
   },
-  timeout: store.getters.timeout // 요청 제한 시간 (15초)
+  timeout: store.getters.timeout // 요청 제한 시간 (10초)
 })
 
 // 요청(request) 인터셉터
 service.interceptors.request.use(
   (config) => {
+    if (config.url.indexOf('banapresso.com') > -1) {
+      console.log(config)
+      config.baseURL = ''
+    }
     if (config.url.indexOf('upload') > -1) {
       config.headers['Content-type'] = 'multipart/form-data'
     }

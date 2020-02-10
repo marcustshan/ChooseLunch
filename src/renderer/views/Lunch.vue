@@ -1,18 +1,10 @@
 <template>
   <div class="wrapper">
     <div class="restaurants">
-      <div class="latest">
-        <ul>
-          <li class="latest_item" v-for="(choice, index) in latestChoices" v-bind:key="index">
-            <span class="latest_title">
-              {{ choice.diffDaysString }} : 
-            </span>
-            <span class="latest_restaurant">
-              {{ choice.restaurant.name }}
-            </span>
-          </li>
-        </ul>
-
+      <button class="btn_coffee" @click="fnShowCoffee">
+        바나프레소
+      </button>
+      <div class="users_container">
         <div class="users_title">
           접속자 : 
         </div>
@@ -27,6 +19,18 @@
             </li>
           </ul>
         </div>
+      </div>
+      <div class="latest">
+        <ul>
+          <li class="latest_item" v-for="(choice, index) in latestChoices" v-bind:key="index">
+            <span class="latest_title">
+              {{ choice.diffDaysString }} : 
+            </span>
+            <span class="latest_restaurant">
+              {{ choice.restaurant.name }}
+            </span>
+          </li>
+        </ul>
       </div>
       <ul class="restaurant_card_list">
         <li class="restaurant_card" v-for="(value, name) in restaurants" v-bind:key="name">
@@ -98,14 +102,22 @@
         <img :src="imageUrl" />
       </div>
     </div>
+
+    <coffee v-show="showCoffee"></coffee>
   </div>
 </template>
 
 <script>
+  import Coffee from '../components/Coffee'
+
   export default {
     name: 'index',
+    components: {
+      Coffee
+    },
     data () {
       return {
+        showCoffee: false,
         users: [],
         showUserList: false,
         scraper: {},
@@ -139,6 +151,9 @@
       }
     },
     methods: {
+      fnShowCoffee () {
+        this.showCoffee = true
+      },
       fnGetUsers () {
         this.$axios.get('/getUsers', {}).then((response) => {
           this.users = []
@@ -426,21 +441,23 @@
 </script>
 
 <style>
-  div.restaurants {width: 70%; height: 100%; float: left; overflow-y: auto; border-right: 1px solid #ccc;}
+  div.restaurants {width: 70%; height: 100%; float: left; overflow-y: auto; border-right: 1px solid #ccc; position: relative;}
 
   div.restaurants div.header { height: 50px; }
 
-  /* 최근 식사 이력 영역 */
-  div.latest {position:relative;}
-  li.latest_item {display: inline-block; margin-left: 15px;}
-  li.latest_item span {font-weight: 600;}
-  li.latest_item span.latest_restaurant {color: #7b11bb;}
+  button.btn_coffee {position: absolute; top: 0; right: 135px;}
   div.users_title {position: absolute; right: 67px; top: 6px; color: #1a7b00; font-weight: 600;}
   div.user_list {border: 1px solid #666; border-radius: 10px; position: absolute; right: 8px; top: 36px; z-index: 99; background-color: #f3f3f3; padding: 5px 10px;}
   div.user_list li {position: relative; padding-left: 17px; padding-top: 7px;}
   div.user_list div.network_status { position: absolute; top: 12px; left: 0px; width: 12px; height: 12px; background-color: #777; border-radius: 6px; }
   div.user_list div.network_status.on { background-color:#2ac700 }
   div.user_list div.network_status.off { background-color:#c22d10 }
+
+  /* 최근 식사 이력 영역 */
+  div.latest {position:relative;}
+  li.latest_item {display: inline-block; margin-left: 15px;}
+  li.latest_item span {font-weight: 600;}
+  li.latest_item span.latest_restaurant {color: #7b11bb;}
   /* 최근 식사 이력 영역 */
 
   /* 채팅 영역 */

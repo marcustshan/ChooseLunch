@@ -5,7 +5,7 @@
 const state = {
   prod_baseUrl: 'http://192.168.14.192:8090',
   dev_baseUrl: '',
-  timeout: 15000,
+  timeout: 10000,
   nowLoading: false,
   showLayerPopup: false
 }
