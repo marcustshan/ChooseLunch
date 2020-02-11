@@ -1,6 +1,6 @@
 <template>
-  <div>
-    ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ
+  <div class="coffee_container">
+    <div class="close" @click="fnClosePopup"></div>
   </div>
 </template>
 
@@ -15,6 +15,9 @@
       }
     },
     methods: {
+      fnClosePopup () {
+        this.EventBus.emit('COFFEE_DIM_CLICK', {})
+      },
       fnGetCoffeeList () {
         const param = {
           'ws': 'fprocess',
@@ -70,5 +73,11 @@
 </script>
 
 <style scoped>
+  div.coffee_container {width: 100%; height: 100%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 1px solid #ccc; background-color: #fff; z-index: 889;}
 
+  div.coffee_container .close { position: absolute; right: 5px; top: 5px; width: 32px; height: 32px; opacity: 0.5; cursor: pointer; }
+  div.coffee_container .close:hover { opacity: 1; }
+  div.coffee_container .close:before, .close:after { position: absolute; left: 15px; content: ' '; height: 33px; width: 2px; background-color: #333; }
+  div.coffee_container .close:before { transform: rotate(45deg); }
+  div.coffee_container .close:after { transform: rotate(-45deg); }
 </style>

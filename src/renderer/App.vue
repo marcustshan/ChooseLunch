@@ -88,10 +88,6 @@
           this.$store.dispatch('setShowLayerPopup', false)
           this.showSmokePopup = false
         })
-        this.EventBus.on('DIM_CLICK', () => {
-          this.$store.dispatch('setShowLayerPopup', false)
-          this.showSmokePopup = false
-        })
         this.$store.dispatch('setShowLayerPopup', true)
         this.showSmokePopup = true
       },
