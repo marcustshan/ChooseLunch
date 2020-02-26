@@ -7,7 +7,7 @@
     <div class="coffee_users_container" v-show="showCoffeeUsers">
       <ul class="coffee_user_list">
         <li v-for="choice in todayCoffeeChoices" v-bind:key="choice.id">
-          {{ choice.name }} - {{ choice.coffeeName }} ({{ choice.isHot ? 'HOT' : 'ICE' }})
+          {{ choice.name }} - {{ choice.coffeeName }} {{ choice.isHot ? 'HOT' : 'ICE' }} ({{fnGetPriceComma(choice.price)}}원)
         </li>
       </ul>
     </div>
@@ -96,7 +96,7 @@
         let clipboardText = `${this.$moment().format('YYYY년 MM월 DD일 ddd요일')} - ${this.user.name}\n`
         let priceSum = 0
         this.todayCoffeeChoices.forEach(choice => {
-          clipboardText += `${choice.name} : ${choice.coffeeName} (${choice.isHot ? 'HOT' : 'ICE'})\n`
+          clipboardText += `${choice.name} : ${choice.coffeeName} ${choice.isHot ? 'HOT' : 'ICE'} (${this.fnGetPriceComma(choice.price)})\n`
           priceSum = priceSum + parseInt(choice.price)
         })
         clipboardText += `\n총액 : ${this.fnGetPriceComma(priceSum)}원\n`
@@ -111,7 +111,7 @@
           clipboardText += `\n${group} : ${groupedChoices[group].length}잔`
         })
 
-        clipboardText += `\n총 ${totalCoffeeCount}잔`
+        clipboardText += `\n\n총 ${totalCoffeeCount}잔`
 
         // navigator.clipboard.writeText(clipboardText)
         let jandiConnectURL = 'https://wh.jandi.com/connect-api/webhook/19790449/db43a74df6bdbd6364feb571ac2b2506'
