@@ -1,9 +1,23 @@
 <template>
   <div class="wrapper">
+    <coffee v-if="showCoffee"></coffee>
     <div class="restaurants">
-      <coffee v-show="showCoffee"></coffee>
+      <!--
+      <div class="choices_container" @mouseenter="showChoices = true" @mouseleave="showChoices = false">
+        <div class="choices">
+          한 눈에 보기
+        </div>
+        <div class="choice_list" v-show="showChoices">
+          <ul>
+            <li v-for="(choice, index) in todayChoices" v-bind:key="index">
+              {{ choice.name }} : 
+            </li>
+          </ul>
+        </div>
+      </div>
+      -->
       <button class="btn_coffee" @click="fnShowCoffee">
-        바나프레소
+        커피
       </button>
       <div class="users_container">
         <div class="users_title">
@@ -17,6 +31,9 @@
             <li v-for="user in users" v-bind:key="user.id">
               <div class="network_status" :class="user.connected ? 'on' : 'off'"></div>
               {{ user.name }}
+              <span v-if="_.filter(todayChoices, (choice) => { return user.id === choice.id }).length > 0">
+                : {{ fnGetRestaurantsName(user.id) }}
+              </span>
             </li>
           </ul>
         </div>
@@ -81,9 +98,7 @@
               </div>
               <div class="message" :class="message.isImage ? 'imageMessage' : ''">
                 <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="baseUrl + '/image/' + message.fileName" />
-                <p v-else>
-                  {{ message.message }}
-                </p>
+                <div v-else v-html="message.message"></div>
                 <div class="time">
                   {{ $moment(message.date, 'YYYYMMDDHHmmss').format('HH:mm:ss') }}
                 </div>
@@ -117,6 +132,7 @@
     data () {
       return {
         showCoffee: false,
+        showChoices: false,
         users: [],
         showUserList: false,
         scraper: {},
@@ -150,10 +166,20 @@
       }
     },
     methods: {
+      fnGetChosen (userId) {
+        return this._.includes(this.todayChoices, (choice) => { return userId === choice.id })
+      },
+      fnGetRestaurantsName (userId) {
+        let foundChoice = this._.find(this.todayChoices, (choice) => { return userId === choice.id })
+        return this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.seq === foundChoice.seq }).name
+      },
       fnShowCoffee () {
-        this.EventBus.on('COFFEE_DIM_CLICK', () => {
+        this.EventBus.on('DIM_CLICK', () => {
+          this.$store.dispatch('setShowLayerPopup', false)
           this.showCoffee = false
+          this.EventBus.off('DIM_CLICK')
         })
+        this.$store.dispatch('setShowLayerPopup', true)
         this.showCoffee = true
       },
       fnGetUsers () {
@@ -342,6 +368,9 @@
         this.$axios.get('/getTodayMessages', {}).then((response) => {
           response.data.forEach((message) => {
             message.own = message.id === this.user.id
+            if (!message.isImage) {
+              message.message = message.message.replace(/(?:\r\n|\r|\n)/g, '<br>')
+            }
           })
           this.messages = response.data
           this.$nextTick(() => {
@@ -447,10 +476,10 @@
 
   div.restaurants div.header { height: 50px; }
 
-  button.btn_coffee {position: absolute; top: 0; right: 135px; z-index: 3;}
+  button.btn_coffee {position: absolute; top: 0; right: 140px; z-index: 3; border: 1px solid #f1446a; background-color: #f1648a; color: #f1f1f1; border-radius: 5px;}
   div.users_title {position: absolute; right: 67px; top: 6px; color: #1a7b00; font-weight: 600;}
   div.user_list {border: 1px solid #666; border-radius: 10px; position: absolute; right: 8px; top: 36px; z-index: 99; background-color: #f3f3f3; padding: 5px 10px;}
-  div.user_list li {position: relative; padding-left: 17px; padding-top: 7px;}
+  div.user_list li {position: relative; padding-left: 17px; padding-top: 7px; font-weight: 600;}
   div.user_list div.network_status { position: absolute; top: 12px; left: 0px; width: 12px; height: 12px; background-color: #777; border-radius: 6px; }
   div.user_list div.network_status.on { background-color:#2ac700 }
   div.user_list div.network_status.off { background-color:#c22d10 }
@@ -470,7 +499,7 @@
   div.chat_input_container input.chat_input {width: 100%; height: 40px; line-height: 40px; border: 1px solid #ccc; padding: 5px;}
   li.chat_item {clear: both;}
   div.message { margin-right: 25px; margin-bottom: 10px; width: fit-content; padding: 10px; position: relative; border-radius: .4em; user-select: text; }
-  div.message p {word-break: break-all;}
+  div.message div {word-break: break-all;}
   div.imageMessage { max-height: 200px; }
   div.imageMessage img { max-height: 160px; max-width: 100%; object-fit: cover; cursor: pointer; }
   div.chat_line.another div.message { float: left; background: #fff; margin-top: 16px; }
@@ -495,6 +524,9 @@
   li.restaurant p.desc span.desc_content { color: #f55; font-weight: 600; }
   li.restaurant p.url { text-indent: 5px; font-size: 14px; color: #33f; cursor: pointer; }
   /* 식당 영역 */
+
+  div.choices { width: 120px; height: 30px; line-height: 30px; border: 1px solid #666; border-radius: 10px; background-color: #f1f1f1; position: absolute; right: 135px; top: 2px; text-align: center; cursor: pointer; z-index: 3; font-weight: 600; }
+  div.choice_list {width: 200px; border: 1px solid #666; border-radius: 10px; position: absolute; right: 101px; top: 36px; z-index: 99; background-color: #f3f3f3; padding: 5px 10px; text-align: center; font-weight: 600;}
 
   /* 참여 팝업 */
   div.layer {width: 90%; height: 90%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; background-color: #fff; border: 2px solid #666; z-index: 999;}

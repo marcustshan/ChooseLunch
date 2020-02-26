@@ -54,11 +54,13 @@ const service = axios.create({
 service.interceptors.request.use(
   (config) => {
     if (config.url.indexOf('banapresso.com') > -1) {
-      console.log(config)
       config.baseURL = ''
-    }
-    if (config.url.indexOf('upload') > -1) {
+    } else if (config.url.indexOf('upload') > -1) {
       config.headers['Content-type'] = 'multipart/form-data'
+    } else if (config.url.indexOf('jandi.com') > -1) {
+      config.baseURL = ''
+      config.headers['Accept'] = 'application/vnd.tosslab.jandi-v2+json'
+      config.headers['Content-type'] = 'application/json'
     }
     store.dispatch('setNowLoading', true)
     return config
