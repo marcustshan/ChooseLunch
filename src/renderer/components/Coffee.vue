@@ -1,9 +1,11 @@
 <template>
   <div class="coffee_container">
     <div class="close" @click="fnClosePopup"></div>
+    <!--
     <button @mouseenter="showCoffeeUsers = true" @mouseleave="showCoffeeUsers = false" class="btn_clipboard" title="클릭하시면 선택 내용들이 잔디로 전송됩니다." v-if="todayCoffeeChoices && todayCoffeeChoices.length > 0" @click="fnSendCoffeeChoices">
       잔디로 보내기
     </button>
+    -->
     <div class="coffee_users_container" v-show="showCoffeeUsers">
       <ul class="coffee_user_list">
         <li v-for="choice in todayCoffeeChoices" v-bind:key="choice.id">
@@ -17,7 +19,6 @@
       </button>
       <div class="my_coffee_container">
         <p v-if="myCoffeeChoice">
-
           <span class="my_coffee">{{ myCoffeeChoice.coffeeName }}</span>
           <span v-if="myCoffeeChoice.isHot">(HOT)</span>
           <span v-else>(ICE)</span>
@@ -29,6 +30,14 @@
       </div>
     </div>
     <div class="coffee_list_container">
+      <div>
+        <h3>
+          커피 선택 1차 마감 : 오전 11시 20분, 2차 마감 : 오전 11시 50분
+        </h3>
+        <p class="deadline_guide">
+          ※ 각 마감 시간 별로 잔디에 자동으로 전송되며, 2차 마감 이후 선택은 주문 시 반영되지 않습니다.
+        </p>
+      </div>
       <div v-for="(list, category, index) of coffeeListMap" v-bind:key="index">
         <h2 :id="category" class="coffee_category">
           {{ category }}
@@ -261,8 +270,8 @@
     mounted () {
       this.fnGetTodayCoffeeChoices()
       this.fnInitEvents()
-      // this.fnGetCoffeeList()
-      this.fnGetCoffeeDemoData()
+      this.fnGetCoffeeList()
+      // this.fnGetCoffeeDemoData()
   
       /*
       0:{name: "nItem", type: "INT4"}
@@ -288,7 +297,7 @@
 <style scoped>
   div.coffee_container {width: 80%; height: 80%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 1px solid #ccc; background-color: #fff; z-index: 889;}
 
-  div.my_coffee_container {padding: 5px 20px; font-weight: 600;}
+  div.my_coffee_container {padding: 10px 10px; font-weight: 600;}
 
   button.btn_clipboard {position: absolute; top: 10px; right: 50px;}
   div.coffee_users_container {position: absolute; z-index: 100; top: 50px; right: 50px; padding: 5px 10px; border: 1px solid #ccc; background-color: #f1f1f1; border-radius: 5px;}
@@ -301,10 +310,11 @@
   div.coffee_container .close:after { transform: rotate(-45deg); }
 
   div.coffee_title {width: 100%; height: 60px; line-height: 60px; text-indent: 20px; font-weight: 600; font-size: 24px;}
-  div.coffee_list_indexes {height: 80px; padding: 10px 0; border-bottom: 1px solid #ccc;}
+  div.coffee_list_indexes {height: 90px; padding: 10px 0; border-bottom: 1px solid #ccc;}
   div.coffee_list_indexes button {margin-left: 10px; border: 1px solid #f1446a; background-color: #f1648a; color: #f1f1f1;}
 
   div.coffee_list_container {height: calc(100% - 80px); overflow: auto; padding: 20px 10px;}
+  div.coffee_list_container .deadline_guide {font-weight: 600; color: #e63030;}
   h2.coffee_category {margin-top: 15px;}
   li.coffee_card {position: relative; width: 300px; height: 400px; display: inline-block; border: 1px solid #ccc; margin-left: 10px; margin-top: 10px;}
   li.coffee_card.selected {border: 2px solid #f1648a;}
