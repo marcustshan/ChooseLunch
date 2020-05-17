@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-expressions */
 
 const state = {
-  prod_baseUrl: 'http://192.168.14.192:8090',
+  prod_baseUrl: 'http://49.247.210.248:8090',
   dev_baseUrl: '',
   timeout: 10000,
   nowLoading: false,

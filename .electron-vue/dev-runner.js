@@ -63,7 +63,7 @@ function startRenderer () {
       compiler,
       {
         proxy: {
-          "**": "http://192.168.14.192:8090"
+          "**": "http://192.168.0.157:8090"
         },
         contentBase: path.join(__dirname, '../'),
         quiet: true,

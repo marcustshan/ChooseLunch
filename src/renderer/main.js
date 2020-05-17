@@ -22,7 +22,7 @@ Vue.config.productionTip = false
 require('./assets/css/reset.css')
 require('./assets/css/common.css')
 
-Vue.prototype.$socket = io('http://192.168.14.192:3001')
+Vue.prototype.$socket = io('http://localhost:3001')
 
 // EventBus 설정
 Vue.prototype.EventBus = new Vue(
@@ -53,6 +53,7 @@ const service = axios.create({
 // 요청(request) 인터셉터
 service.interceptors.request.use(
   (config) => {
+    config.headers['jwt-header'] = Vue.prototype.getCookie('ChooseLunchJWT')
     if (config.url.indexOf('banapresso.com') > -1) {
       config.baseURL = ''
     } else if (config.url.indexOf('upload') > -1) {
@@ -92,15 +93,33 @@ Vue.prototype.deepCopy = (target) => {
   return JSON.parse(JSON.stringify(target))
 }
 
-service.get('/getUser', {}).then((response) => {
-  store.dispatch('setUserInfo', response.data)
-}).finally(() => {
-  /* eslint-disable no-new */
-  window.rootVm = new Vue({
-    components: { App },
-    router,
-    store,
-    moment,
-    template: '<App/>'
-  }).$mount('#app')
-})
+/* 쿠키 관련 함수 */
+Vue.prototype.setCookie = (cookieName, value, days) => {
+  let exdate = new Date()
+  exdate.setDate(exdate.getDate() + days)
+  let cookieValue = escape(value) + ((days == null) ? '' : '; expires=' + exdate.toUTCString())
+  document.cookie = cookieName + '=' + cookieValue
+}
+
+Vue.prototype.getCookie = (cookieName) => {
+  let x, y
+  let val = document.cookie.split(';')
+
+  for (let i = 0; i < val.length; i++) {
+    x = val[i].substr(0, val[i].indexOf('='))
+    y = val[i].substr(val[i].indexOf('=') + 1)
+    x = x.replace(/^\s+|\s+$/g, '') // 앞과 뒤의 공백 제거하기
+    if (x === cookieName) {
+      return unescape(y) // unescape로 디코딩 후 값 리턴
+    }
+  }
+}
+
+/* eslint-disable no-new */
+window.rootVm = new Vue({
+  components: { App },
+  router,
+  store,
+  moment,
+  template: '<App/>'
+}).$mount('#app')

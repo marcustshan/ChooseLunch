@@ -59,22 +59,22 @@
             </div>
           </div>
           <ul class="restaurant_list">
-            <li class="restaurant" v-for="restaurant in value" v-bind:key="restaurant.seq">
+            <li class="restaurant" v-for="restaurant in value" v-bind:key="restaurant.restaurant_seq">
               <span class="bold">{{ restaurant.name }}</span>
-              <p class="loc" v-if="restaurant.loc && restaurant.loc.length > 0">
-                위치 : {{ restaurant.loc }}
+              <p class="loc" v-if="restaurant.location && restaurant.location.length > 0">
+                위치 : {{ restaurant.location }}
               </p>
-              <p class="desc" v-if="restaurant.desc && restaurant.desc.length > 0">
-                특징 : <span class="desc_content">{{ restaurant.desc }}</span>
+              <p class="desc" v-if="restaurant.description && restaurant.description.length > 0">
+                특징 : <span class="desc_content">{{ restaurant.description }}</span>
               </p>
-              <p class="url" @click.prevent="fnShowBuffet(restaurant.instagramID)" v-if="restaurant.url && restaurant.url.length > 0">
+              <p class="url" @click.prevent="fnShowBuffet(restaurant.instagram_id)" v-if="restaurant.instagram_url && restaurant.instagram_url.length > 0">
                 메뉴확인 >
               </p>
-              <div class="users" v-tooltip="{ content: fnGetChosenUsers(restaurant.seq), placement: 'left'}">
-                {{ fnGetUserCount(restaurant.seq, 'R') }}
+              <div class="users" v-tooltip="{ content: fnGetChosenUsers(restaurant.restaurant_seq), placement: 'left'}">
+                {{ fnGetUserCount(restaurant.restaurant_seq, 'R') }}
               </div>
               <div class="choose">
-                <button v-if="myChoice && myChoice.seq === restaurant.seq" class="cancel" @click="fnChoose(restaurant.seq, false)">
+                <button v-if="myChoice && myChoice.restaurant_seq === restaurant.restaurant_seq" class="cancel" @click="fnChoose(restaurant.restaurant_seq, false)">
                   취소
                 </button>
                 <button v-else-if="!myChoice" class="choose" @click="fnChoose(restaurant.seq, true)">
@@ -98,7 +98,7 @@
               </div>
               <div class="message" :class="message.isImage ? 'imageMessage' : ''">
                 <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="baseUrl + '/image/' + message.fileName" />
-                <div v-else v-html="message.message"></div>
+                <div v-else v-html="message.chat"></div>
                 <div class="time">
                   {{ $moment(message.date, 'YYYYMMDDHHmmss').format('HH:mm:ss') }}
                 </div>
@@ -238,10 +238,9 @@
         let formData = new FormData()
         let fileName = this.user.id + '_' + this.$moment().format('YYYYMMDDHHmmssSSS') + '.png'
         formData.append('image', imageData)
-        formData.append('id', this.user.id)
-        formData.append('name', this.user.name)
-        formData.append('isImage', true)
-        formData.append('date', this.$moment().format('YYYYMMDDHHmmss'))
+        formData.append('user_seq', this.user.user_seq)
+        formData.append('image_yn', 'Y')
+        formData.append('chat_time', this.$moment().format('YYYYMMDDHHmmss'))
         formData.append('fileName', fileName)
         this.$axios.post('/upload', formData).then((response) => {
           this.$socket.emit('chat', response.data)
@@ -325,9 +324,9 @@
         }
 
         let message = {
-          id: this.user.id,
+          user_seq: this.user.user_seq,
           name: this.user.name,
-          message: this.sendMessage,
+          chat: this.sendMessage,
           date: this.$moment().format('YYYYMMDDHHmmss')
         }
         this.$socket.emit('chat', message)
@@ -366,10 +365,11 @@
       },
       fnGetTodayMessages () {
         this.$axios.get('/getTodayMessages', {}).then((response) => {
+          console.log(response)
           response.data.forEach((message) => {
             message.own = message.id === this.user.id
             if (!message.isImage) {
-              message.message = message.message.replace(/(?:\r\n|\r|\n)/g, '<br>')
+              message.chat = message.chat.replace(/(?:\r\n|\r|\n)/g, '<br>')
             }
           })
           this.messages = response.data
@@ -385,7 +385,7 @@
           this.flattenRestaurnts.forEach((restaurant) => {
             restaurant.showTooltip = false
           })
-          this.restaurants = this._.groupBy(response.data, 'category')
+          this.restaurants = this._.groupBy(response.data, 'category_name')
         })
       },
       fnShowBuffet (instagramID) {
@@ -437,6 +437,8 @@
         this.EventBus.on('USERS_CHANGED', (users) => {
           this.users = []
           this.users.push(...users)
+
+          console.log(this.users)
         })
       },
       fnInitSocket () {
@@ -454,10 +456,17 @@
         this.$socket.on('usersChanged', (data) => {
           this.EventBus.emit('USERS_CHANGED', data)
         })
+
+        this.$socket.emit('connected', this.user)
       }
     },
     mounted () {
       this.scraper = require('instagram-scraping')
+
+      if (!this.user || !this.user.id) {
+        this.$router.push('/')
+        return
+      }
 
       this.fnInitEventBus()
       this.fnInitSocket()

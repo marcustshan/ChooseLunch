@@ -1,11 +1,9 @@
 <template>
   <div class="coffee_container">
     <div class="close" @click="fnClosePopup"></div>
-    <!--
     <button @mouseenter="showCoffeeUsers = true" @mouseleave="showCoffeeUsers = false" class="btn_clipboard" title="클릭하시면 선택 내용들이 잔디로 전송됩니다." v-if="todayCoffeeChoices && todayCoffeeChoices.length > 0" @click="fnSendCoffeeChoices">
-      잔디로 보내기
+      커피 선택 보기
     </button>
-    -->
     <div class="coffee_users_container" v-show="showCoffeeUsers">
       <ul class="coffee_user_list">
         <li v-for="choice in todayCoffeeChoices" v-bind:key="choice.id">
@@ -270,8 +268,8 @@
     mounted () {
       this.fnGetTodayCoffeeChoices()
       this.fnInitEvents()
-      this.fnGetCoffeeList()
-      // this.fnGetCoffeeDemoData()
+      // this.fnGetCoffeeList()
+      this.fnGetCoffeeDemoData()
   
       /*
       0:{name: "nItem", type: "INT4"}
