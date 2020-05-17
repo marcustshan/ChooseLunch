@@ -28,11 +28,11 @@
         </div>
         <div class="user_list" v-show="showUserList">
           <ul>
-            <li v-for="user in users" v-bind:key="user.id">
+            <li v-for="user in users" v-bind:key="user.user_seq">
               <div class="network_status" :class="user.connected ? 'on' : 'off'"></div>
               {{ user.name }}
-              <span v-if="_.filter(todayChoices, (choice) => { return user.id === choice.id }).length > 0">
-                : {{ fnGetRestaurantsName(user.id) }}
+              <span v-if="_.filter(todayChoices, (choice) => { return user.user_seq === choice.user_seq }).length > 0">
+                : {{ fnGetRestaurantsName(user.user_seq) }}
               </span>
             </li>
           </ul>
@@ -77,7 +77,7 @@
                 <button v-if="myChoice && myChoice.restaurant_seq === restaurant.restaurant_seq" class="cancel" @click="fnChoose(restaurant.restaurant_seq, false)">
                   취소
                 </button>
-                <button v-else-if="!myChoice" class="choose" @click="fnChoose(restaurant.seq, true)">
+                <button v-else-if="!myChoice" class="choose" @click="fnChoose(restaurant.restaurant_seq, true)">
                   선택
                 </button>
               </div>
@@ -159,19 +159,16 @@
         return this.$store.getters.userInfo
       },
       myChoice () {
-        return this._.find(this.todayChoices, (choice) => { return choice.id === this.user.id })
+        return this._.find(this.todayChoices, (choice) => { return choice.user_seq === this.user.user_seq })
       },
       socketDisconnected () {
         return this.$store.getters.socketDisconnected
       }
     },
     methods: {
-      fnGetChosen (userId) {
-        return this._.includes(this.todayChoices, (choice) => { return userId === choice.id })
-      },
-      fnGetRestaurantsName (userId) {
-        let foundChoice = this._.find(this.todayChoices, (choice) => { return userId === choice.id })
-        return this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.seq === foundChoice.seq }).name
+      fnGetRestaurantsName (userSeq) {
+        let foundChoice = this._.find(this.todayChoices, (choice) => { return userSeq === choice.user_seq })
+        return this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === foundChoice.restaurant_seq }).name
       },
       fnShowCoffee () {
         this.EventBus.on('DIM_CLICK', () => {
@@ -280,8 +277,12 @@
 
         return returnString
       },
-      fnChoose (seq, choose) {
-        this.$socket.emit('choose', { seq: seq, id: this.user.id, name: this.user.name, choose: choose })
+      fnChoose (restaurantSeq, choose) {
+        const chooseParam = { restaurant_seq: restaurantSeq, user_seq: this.user.user_seq, name: this.user.name, choose: choose }
+        this.$axios.post('/choose', chooseParam).then((response) => {
+          this.todayChoices = []
+          this.todayChoices.push(...response.data)
+        })
       },
       fnClosePopup () {
         this.EventBus.off('DIM_CLICK')
@@ -300,14 +301,14 @@
         if (type === 'C') {
           this.todayChoices.forEach((choice) => {
             this.flattenRestaurnts.forEach((restaurant) => {
-              if (choice.seq === restaurant.seq && restaurant.category === value) {
+              if (choice.restaurant_seq === restaurant.restaurant_seq && restaurant.category_name === value) {
                 count++
               }
             })
           })
         } else {
           count = this._.filter(this.todayChoices, (choice) => {
-            return choice.seq === value
+            return choice.restaurant_seq === value
           }).length
         }
 
@@ -341,21 +342,23 @@
         })
       },
       fnGetLatestChoices () {
-        this.$axios.get('/getLatestChoices/' + this.user.id, {}).then((response) => {
+        this.$axios.get('/getLatestChoices/' + this.user.user_seq, {}).then((response) => {
           this.latestChoices = []
-          let today = this.$moment()
-          for (let day in response.data) {
-            let choice = response.data[day]
-            let diffDays = today.diff(this.$moment(day, 'YYYYMMDD'), 'days')
-            let restaurant = this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.seq === choice.seq })
 
+          if (!response.data || !response.data.length) {
+            return
+          }
+
+          let today = this.$moment()
+          response.data.foreach(choice => {
+            let diffDays = today.diff(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'days')
+            let restaurant = this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === choice.lunch_choice_seq })
             this.latestChoices.push({
-              day: day,
               diffDays: diffDays,
-              diffDaysString: diffDays === 1 ? '어제' : diffDays === 2 ? '그제' : this.$moment(day, 'YYYYMMDD').format('MM월 DD일 (ddd)'),
+              diffDaysString: diffDays === 1 ? '어제' : diffDays === 2 ? '그제' : this.$moment(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'YYYYMMDD').format('MM월 DD일 (ddd)'),
               restaurant: restaurant
             })
-          }
+          })
         })
       },
       fnGetTodayChoices () {
@@ -365,7 +368,6 @@
       },
       fnGetTodayMessages () {
         this.$axios.get('/getTodayMessages', {}).then((response) => {
-          console.log(response)
           response.data.forEach((message) => {
             message.own = message.id === this.user.id
             if (!message.isImage) {
@@ -437,8 +439,6 @@
         this.EventBus.on('USERS_CHANGED', (users) => {
           this.users = []
           this.users.push(...users)
-
-          console.log(this.users)
         })
       },
       fnInitSocket () {
