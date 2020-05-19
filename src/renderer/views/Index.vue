@@ -7,7 +7,7 @@
       <div class="content">
         <input class="login_input" placeholder="ID" type="text" v-model="user.id" />
         <br />
-        <input class="login_input" placeholder="Password" type="password" v-model="user.password" />
+        <input class="login_input" placeholder="Password" type="password" v-model="user.password" v-on:keyup.enter="fnLogin" />
         <br />
         <br />
         <input class="checkbox" type="checkbox" v-model="remember" id="remember" />

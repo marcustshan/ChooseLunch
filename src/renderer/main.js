@@ -22,8 +22,6 @@ Vue.config.productionTip = false
 require('./assets/css/reset.css')
 require('./assets/css/common.css')
 
-Vue.prototype.$socket = io('http://localhost:3001')
-
 // EventBus 설정
 Vue.prototype.EventBus = new Vue(
   {
@@ -113,6 +111,12 @@ Vue.prototype.getCookie = (cookieName) => {
       return unescape(y) // unescape로 디코딩 후 값 리턴
     }
   }
+}
+
+if (process.env.WEBPACK_DEV_SERVER) {
+  Vue.prototype.$socket = io('http://localhost:3001')
+} else {
+  Vue.prototype.$socket = io('http://49.247.210.248:3001')
 }
 
 /* eslint-disable no-new */

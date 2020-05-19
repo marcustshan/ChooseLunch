@@ -7,7 +7,7 @@
     <div class="coffee_users_container" v-show="showCoffeeUsers">
       <ul class="coffee_user_list">
         <li v-for="choice in todayCoffeeChoices" v-bind:key="choice.id">
-          {{ choice.name }} - {{ choice.coffeeName }} {{ choice.isHot ? 'HOT' : 'ICE' }} ({{fnGetPriceComma(choice.price)}}원)
+          {{ choice.name }} - {{ choice.coffee_name }} {{ choice.isHot ? 'HOT' : 'ICE' }} ({{fnGetPriceComma(choice.price)}}원)
         </li>
       </ul>
     </div>
@@ -17,7 +17,7 @@
       </button>
       <div class="my_coffee_container">
         <p v-if="myCoffeeChoice">
-          <span class="my_coffee">{{ myCoffeeChoice.coffeeName }}</span>
+          <span class="my_coffee">{{ myCoffeeChoice.coffee_name }}</span>
           <span v-if="myCoffeeChoice.isHot">(HOT)</span>
           <span v-else>(ICE)</span>
           을(를) 선택하셨습니다.
@@ -41,7 +41,7 @@
           {{ category }}
         </h2>
         <ul>
-          <li :class="myCoffeeChoice && myCoffeeChoice.seq === coffee.nItem ? 'selected' : ''" class="coffee_card" v-for="coffee in coffeeListMap[category]" v-bind:key="coffee.nItem">
+          <li :class="myCoffeeChoice && myCoffeeChoice.coffee_seq === coffee.nItem ? 'selected' : ''" class="coffee_card" v-for="coffee in coffeeListMap[category]" v-bind:key="coffee.nItem">
             <div class="coffee_image">
               <img :src="coffee.sImageUrl" />
             </div>
@@ -49,13 +49,13 @@
               {{ coffee.sItem }} (￦ {{ coffee.nCharge | currency }}원)
             </div>
             <div class="card_hot_ice">
-              <button @click="fnChooseCoffee(coffee, true)" class="btn_hot_ice hot" v-if="!myCoffeeChoice && coffee.nIceItemType !== 2">
+              <button @click="fnChooseCoffee(coffee, true, true)" class="btn_hot_ice hot" v-if="!myCoffeeChoice && coffee.nIceItemType !== 2">
                 HOT
               </button>
-              <button @click="fnChooseCoffee(coffee, false)" class="btn_hot_ice ice" v-if="!myCoffeeChoice && coffee.nIceItemType !== 1">
+              <button @click="fnChooseCoffee(coffee, true, false)" class="btn_hot_ice ice" v-if="!myCoffeeChoice && coffee.nIceItemType !== 1">
                 ICE
               </button>
-              <button @click="fnCancelCoffee(coffee)" class="btn_hot_ice" v-if="myCoffeeChoice && myCoffeeChoice.seq === coffee.nItem">
+              <button @click="fnChooseCoffee(coffee, false)" class="btn_hot_ice" v-if="myCoffeeChoice && myCoffeeChoice.coffee_seq === coffee.nItem">
                 취소
               </button>
             </div>
@@ -74,7 +74,7 @@
         return this.$store.getters.userInfo
       },
       myCoffeeChoice () {
-        return this._.find(this.todayCoffeeChoices, (choice) => { return choice.id === this.user.id })
+        return this._.find(this.todayCoffeeChoices, (choice) => { return choice.user_seq === this.user.user_seq })
       }
     },
     filters: {
@@ -97,19 +97,19 @@
     },
     methods: {
       fnGetPriceComma (price) {
-        return price.toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,')
+        return Number.parseInt(price).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,')
       },
       fnSendCoffeeChoices () {
         let clipboardText = `${this.$moment().format('YYYY년 MM월 DD일 ddd요일')} - ${this.user.name}\n`
         let priceSum = 0
         this.todayCoffeeChoices.forEach(choice => {
-          clipboardText += `${choice.name} : ${choice.coffeeName} ${choice.isHot ? 'HOT' : 'ICE'} (${this.fnGetPriceComma(choice.price)})\n`
+          clipboardText += `${choice.name} : ${choice.coffee_name} ${choice.isHot ? 'HOT' : 'ICE'} (${this.fnGetPriceComma(choice.price)})\n`
           priceSum = priceSum + parseInt(choice.price)
         })
         clipboardText += `\n총액 : ${this.fnGetPriceComma(priceSum)}원\n`
 
         let groupedChoices = this._.groupBy(this.todayCoffeeChoices, choice => {
-          return `${choice.coffeeName} (${choice.isHot ? 'HOT' : 'ICE'})`
+          return `${choice.coffee_name} (${choice.isHot ? 'HOT' : 'ICE'})`
         })
         let groups = Object.keys(groupedChoices)
         let totalCoffeeCount = 0
@@ -120,9 +120,9 @@
 
         clipboardText += `\n\n총 ${totalCoffeeCount}잔`
 
-        // navigator.clipboard.writeText(clipboardText)
-        let jandiConnectURL = 'https://wh.jandi.com/connect-api/webhook/19790449/db43a74df6bdbd6364feb571ac2b2506'
-        this.$axios.post(jandiConnectURL, {'body': clipboardText}).then(response => {})
+        navigator.clipboard.writeText(clipboardText)
+        // let jandiConnectURL = 'https://wh.jandi.com/connect-api/webhook/19790449/db43a74df6bdbd6364feb571ac2b2506'
+        // this.$axios.post(jandiConnectURL, {'body': clipboardText}).then(response => {})
       },
       fnInitEvents () {
         this.$socket.off('chosenCoffee')
@@ -135,22 +135,21 @@
           this.todayCoffeeChoices.push(...choices)
         })
       },
-      fnCancelCoffee (coffee) {
-        this.$socket.emit('chooseCoffee', {
-          id: this.user.id,
-          choose: false
-        })
-      },
-      fnChooseCoffee (coffee, isHot) {
-        this.$socket.emit('chooseCoffee', {
+      fnChooseCoffee (coffee, choose, isHot) {
+        const chooseParam = {
           category: coffee.sItemDivision,
           seq: coffee.nItem,
-          coffeeName: coffee.sItem,
+          coffee_name: coffee.sItem,
           isHot,
           price: coffee.nCharge,
           name: this.user.name,
           id: this.user.id,
-          choose: true
+          user_seq: this.user.user_seq,
+          choose
+        }
+        this.$axios.post('/choose/coffee', chooseParam).then((response) => {
+          this.todayCoffeeChoices = []
+          this.todayCoffeeChoices.push(...response.data)
         })
       },
       fnSelectCoffee (coffee) {
@@ -165,7 +164,7 @@
       },
       fnGetTodayCoffeeChoices () {
         this.$axios.get('/getTodayCoffeeChoices', {}).then((response) => {
-          this.todayCoffeeChoices = this._.orderBy(response.data, ['coffeeName', 'isHot'], ['asc', 'asc'])
+          this.todayCoffeeChoices = this._.orderBy(response.data, ['coffee_name', 'isHot'], ['asc', 'asc'])
         })
       },
       fnGetCoffeeList () {

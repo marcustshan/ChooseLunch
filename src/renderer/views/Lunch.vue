@@ -97,7 +97,7 @@
                 {{ message.name }}
               </div>
               <div class="message" :class="message.isImage ? 'imageMessage' : ''">
-                <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="baseUrl + '/image/' + message.fileName" />
+                <img @click="fnShowImage(message.fileName)" v-if="message.isImage" :src="`${baseUrl}/image/${message.fileName}`" />
                 <div v-else v-html="message.chat"></div>
                 <div class="time">
                   {{ $moment(message.date, 'YYYYMMDDHHmmss').format('HH:mm:ss') }}
@@ -226,14 +226,14 @@
         }
       },
       fnShowImage (fileName) {
-        this.imageUrl = this.baseUrl + '/image/' + fileName
+        this.imageUrl = `${this.baseUrl}/image/${fileName}`
         this.$nextTick(() => {
           this.fnShowPopup()
         })
       },
       fnSendImage (imageData) {
         let formData = new FormData()
-        let fileName = this.user.id + '_' + this.$moment().format('YYYYMMDDHHmmssSSS') + '.png'
+        let fileName = `${this.user.user_seq}_${this.user.id}_${this.$moment().format('YYYYMMDDHHmmssSSS')}.png`
         formData.append('image', imageData)
         formData.append('user_seq', this.user.user_seq)
         formData.append('image_yn', 'Y')
@@ -269,16 +269,22 @@
         this.fnSendImage(imageData)
       },
       fnGetChosenUsers (seq) {
-        let chosenUsers = this._.filter(this.todayChoices, (choice) => { return choice.seq === seq })
+        let chosenUsers = this._.filter(this.todayChoices, (choice) => { return choice.restaurant_seq === seq })
         let returnString = ''
         chosenUsers.forEach((user) => {
-          returnString += '<p>' + user.name + '</p>'
+          returnString += `<p>${user.name}</p>`
         })
 
         return returnString
       },
       fnChoose (restaurantSeq, choose) {
-        const chooseParam = { restaurant_seq: restaurantSeq, user_seq: this.user.user_seq, name: this.user.name, choose: choose }
+        const chooseParam = {
+          restaurant_seq: restaurantSeq,
+          user_seq: this.user.user_seq,
+          id: this.user.id,
+          name: this.user.name,
+          choose: choose
+        }
         this.$axios.post('/choose', chooseParam).then((response) => {
           this.todayChoices = []
           this.todayChoices.push(...response.data)
@@ -342,7 +348,7 @@
         })
       },
       fnGetLatestChoices () {
-        this.$axios.get('/getLatestChoices/' + this.user.user_seq, {}).then((response) => {
+        this.$axios.get(`/getLatestChoices/${this.user.user_seq}`, {}).then((response) => {
           this.latestChoices = []
 
           if (!response.data || !response.data.length) {
@@ -449,6 +455,7 @@
 
         this.$socket.off('chosen')
         this.$socket.on('chosen', (data) => {
+          console.log('chosen', data)
           this.EventBus.emit('REFRESH_CHOICES', data)
         })
 
