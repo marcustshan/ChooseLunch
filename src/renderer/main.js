@@ -65,7 +65,8 @@ service.interceptors.request.use(
     return config
   },
   (error) => {
-    store.dispatch('setNowLoading', true)
+    store.dispatch('setNowLoading', false)
+    alert(error.message, 'Choose Lunch')
     Promise.reject(error)
   }
 )

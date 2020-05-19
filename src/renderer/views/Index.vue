@@ -5,7 +5,7 @@
         식사 하고 하시죠!
       </div>
       <div class="content">
-        <input class="login_input" placeholder="ID" type="text" v-model="user.id" />
+        <input class="login_input" placeholder="ID" type="text" v-model="user.id" autofocus />
         <br />
         <input class="login_input" placeholder="Password" type="password" v-model="user.password" v-on:keyup.enter="fnLogin" />
         <br />
@@ -42,7 +42,6 @@
     methods: {
       fnLogin () {
         this.$axios.post('/login', this.user).then((response) => {
-          console.log(response)
           if (!response.data) {
             this.alert('로그인 정보를 확인해주세요.')
           } else {
