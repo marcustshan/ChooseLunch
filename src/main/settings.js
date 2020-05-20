@@ -5,13 +5,12 @@ const fs = require('fs')
 export class Settings {
   constructor (opts) {
     const userDataPath = (electron.app || electron.remote.app).getPath('userData')
-    this.path = path.join(userDataPath, opts.configName + '.json')
-
-    if (!fs.existsSync(this.path)) {
-      fs.writeFileSync(this.path, '', 'utf8')
-    }
-
     try {
+      if (!fs.existsSync(userDataPath, opts.configName + '.json')) {
+        fs.writeFileSync(userDataPath, opts.configName + '.json', '', 'utf8')
+      }
+      this.path = path.join(userDataPath, opts.configName + '.json')
+
       this.data = JSON.parse(fs.readFileSync(this.path, 'utf8'))
     } catch (error) {
       this.data = opts.defaults
