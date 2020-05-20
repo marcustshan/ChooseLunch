@@ -147,10 +147,7 @@
           user_seq: this.user.user_seq,
           choose
         }
-        this.$axios.post('/choose/coffee', chooseParam).then((response) => {
-          this.todayCoffeeChoices = []
-          this.todayCoffeeChoices.push(...response.data)
-        })
+        this.$socket.emit('chooseCoffee', chooseParam)
       },
       fnSelectCoffee (coffee) {
         coffee.selected = true
@@ -267,8 +264,8 @@
     mounted () {
       this.fnGetTodayCoffeeChoices()
       this.fnInitEvents()
-      // this.fnGetCoffeeList()
-      this.fnGetCoffeeDemoData()
+      this.fnGetCoffeeList()
+      // this.fnGetCoffeeDemoData()
   
       /*
       0:{name: "nItem", type: "INT4"}

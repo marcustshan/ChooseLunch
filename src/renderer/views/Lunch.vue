@@ -237,6 +237,7 @@
         formData.append('image', imageData)
         formData.append('user_seq', this.user.user_seq)
         formData.append('image_yn', 'Y')
+        formData.append('isImage', true)
         formData.append('chat_time', this.$moment().format('YYYYMMDDHHmmss'))
         formData.append('fileName', fileName)
         this.$axios.post('/upload', formData).then((response) => {
@@ -285,10 +286,7 @@
           name: this.user.name,
           choose: choose
         }
-        this.$axios.post('/choose', chooseParam).then((response) => {
-          this.todayChoices = []
-          this.todayChoices.push(...response.data)
-        })
+        this.$socket.emit('choose', chooseParam)
       },
       fnClosePopup () {
         this.EventBus.off('DIM_CLICK')
