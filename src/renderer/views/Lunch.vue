@@ -427,7 +427,7 @@
       },
       fnInitEventBus () {
         this.EventBus.on('ADD_MESSAGE', (message) => {
-          message.own = message.id === this.user.id
+          message.own = message.user_seq === this.user.user_seq
           this.messages.push(message)
           this.$nextTick(() => {
             let chatDiv = document.getElementById('chatContent')

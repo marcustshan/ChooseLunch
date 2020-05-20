@@ -47,7 +47,7 @@
           } else {
             this.$store.dispatch('setUserInfo', response.data)
             if (this.remember) {
-              this.setCookie('ChooseLunchJWT', response.data.token, 15)
+              localStorage.setItem('ChooseLunchJWT', response.data.token)
             }
             this.$router.push('/lunch')
           }
@@ -64,7 +64,7 @@
         })
       },
       fnCheckRemember () {
-        const token = this.getCookie('ChooseLunchJWT')
+        const token = localStorage.getItem('ChooseLunchJWT')
         if (token && token.length > 0) {
           this.fnLoginByToken()
         }
