@@ -332,7 +332,7 @@
           user_seq: this.user.user_seq,
           name: this.user.name,
           chat: this.sendMessage,
-          date: this.$moment().format('YYYYMMDDHHmmss')
+          chat_time: this.$moment().format('YYYYMMDDHHmmss')
         }
         this.$socket.emit('chat', message)
 
