@@ -115,9 +115,9 @@ Vue.prototype.getCookie = (cookieName) => {
 }
 
 if (process.env.WEBPACK_DEV_SERVER) {
-  Vue.prototype.$socket = io('http://localhost:3001')
+  Vue.prototype.$socket = io('http://localhost:8090')
 } else {
-  Vue.prototype.$socket = io('http://49.247.210.248:3001')
+  Vue.prototype.$socket = io('http://cl.byulsoft.com')
 }
 
 /* eslint-disable no-new */
