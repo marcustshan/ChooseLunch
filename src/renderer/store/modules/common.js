@@ -3,8 +3,8 @@
 /* eslint-disable no-unused-expressions */
 
 const state = {
-  prod_baseUrl: 'http://cl.byulsoft.com',
-  dev_baseUrl: '',
+  prod_baseUrl: 'http://cl.byulsoft.com/api',
+  dev_baseUrl: '/api',
   timeout: 10000,
   nowLoading: false,
   showLayerPopup: false
