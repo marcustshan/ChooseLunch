@@ -51,7 +51,10 @@ const service = axios.create({
 // 요청(request) 인터셉터
 service.interceptors.request.use(
   (config) => {
-    config.headers['jwt-header'] = Vue.prototype.getCookie('ChooseLunchJWT')
+    const jwt = localStorage.getItem('ChooseLunchJWT')
+    if (jwt && jwt.length > 0) {
+      config.headers['jwt-header'] = jwt
+    }
     if (config.url.indexOf('banapresso.com') > -1) {
       config.baseURL = ''
     } else if (config.url.indexOf('upload') > -1) {
@@ -114,11 +117,7 @@ Vue.prototype.getCookie = (cookieName) => {
   }
 }
 
-if (process.env.WEBPACK_DEV_SERVER) {
-  Vue.prototype.$socket = io('http://localhost:8090')
-} else {
-  Vue.prototype.$socket = io('http://cl.byulsoft.com')
-}
+Vue.prototype.$socket = io('http://cl.byulsoft.com')
 
 /* eslint-disable no-new */
 window.rootVm = new Vue({

@@ -127,7 +127,7 @@
         } else if (e.key === 'F5') {
           require('electron').remote.getCurrentWindow().reload()
         } else if (e.key.toLowerCase() === 's' && e.altKey) {
-          if (!this.user.isSmoker) {
+          if (!this.user.smoker_yn === 'Y') {
             return
           }
           this.$socket.emit('smoke', { id: this.user.id, name: this.user.name })

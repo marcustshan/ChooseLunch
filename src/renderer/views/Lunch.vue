@@ -167,8 +167,12 @@
     },
     methods: {
       fnGetRestaurantsName (userSeq) {
-        let foundChoice = this._.find(this.todayChoices, (choice) => { return userSeq === choice.user_seq })
-        return this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === foundChoice.restaurant_seq }).name
+        const foundChoice = this._.find(this.todayChoices, (choice) => { return userSeq === choice.user_seq })
+        if (foundChoice && foundChoice.restaurant_seq) {
+          return this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === foundChoice.restaurant_seq }).name
+        } else {
+          return ''
+        }
       },
       fnShowCoffee () {
         this.EventBus.on('DIM_CLICK', () => {
@@ -347,16 +351,15 @@
       },
       fnGetLatestChoices () {
         this.$axios.get(`/getLatestChoices/${this.user.user_seq}`, {}).then((response) => {
-          this.latestChoices = []
-
-          if (!response.data || !response.data.length) {
+          if (!response.data || response.data.length < 1) {
             return
           }
 
-          let today = this.$moment()
+          this.latestChoices = []
+          const today = this.$moment()
           response.data.foreach(choice => {
-            let diffDays = today.diff(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'days')
-            let restaurant = this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === choice.lunch_choice_seq })
+            const diffDays = today.diff(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'days')
+            const restaurant = this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === choice.lunch_choice_seq })
             this.latestChoices.push({
               diffDays: diffDays,
               diffDaysString: diffDays === 1 ? '어제' : diffDays === 2 ? '그제' : this.$moment(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'YYYYMMDD').format('MM월 DD일 (ddd)'),
