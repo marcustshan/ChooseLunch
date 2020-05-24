@@ -71,7 +71,7 @@
     name: 'coffee',
     computed: {
       user () {
-        return this.$store.getters.userInfo
+        return this.$store.state.user.userInfo
       },
       myCoffeeChoice () {
         return this._.find(this.todayCoffeeChoices, (choice) => { return choice.user_seq === this.user.user_seq })

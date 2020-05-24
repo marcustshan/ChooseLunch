@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" @click="fnHideMenu">
     <coffee v-if="showCoffee"></coffee>
     <div class="restaurants">
       <!--
@@ -38,14 +38,14 @@
           </ul>
         </div>
       </div>
-      <div class="latest">
+      <div class="latest" v-if="latestChoices && latestChoices.length > 0">
         <ul>
           <li class="latest_item" v-for="(choice, index) in latestChoices" v-bind:key="index">
             <span class="latest_title">
               {{ choice.diffDaysString }} : 
             </span>
             <span class="latest_restaurant">
-              {{ choice.restaurant.name }}
+              {{ choice.restaurantName }}
             </span>
           </li>
         </ul>
@@ -156,16 +156,16 @@
         return this.$store.getters.baseUrl
       },
       user () {
-        return this.$store.getters.userInfo
+        return this.$store.state.user.userInfo
       },
       myChoice () {
         return this._.find(this.todayChoices, (choice) => { return choice.user_seq === this.user.user_seq })
-      },
-      socketDisconnected () {
-        return this.$store.getters.socketDisconnected
       }
     },
     methods: {
+      fnHideMenu () {
+        this.$store.dispatch('setMenuShow', false)
+      },
       fnGetRestaurantsName (userSeq) {
         const foundChoice = this._.find(this.todayChoices, (choice) => { return userSeq === choice.user_seq })
         if (foundChoice && foundChoice.restaurant_seq) {
@@ -357,13 +357,13 @@
 
           this.latestChoices = []
           const today = this.$moment()
-          response.data.foreach(choice => {
+          response.data.forEach(choice => {
             const diffDays = today.diff(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'days')
-            const restaurant = this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === choice.lunch_choice_seq })
+            const restaurant = this._.find(this.flattenRestaurnts, (restaurant) => { return restaurant.restaurant_seq === choice.restaurant_seq })
             this.latestChoices.push({
               diffDays: diffDays,
               diffDaysString: diffDays === 1 ? '어제' : diffDays === 2 ? '그제' : this.$moment(this.$moment(choice.choose_time, 'YYYYMMDDHHmmssSSS'), 'YYYYMMDD').format('MM월 DD일 (ddd)'),
-              restaurant: restaurant
+              restaurantName: restaurant.name
             })
           })
         })
@@ -395,6 +395,7 @@
             restaurant.showTooltip = false
           })
           this.restaurants = this._.groupBy(response.data, 'category_name')
+          this.fnGetLatestChoices()
         })
       },
       fnShowBuffet (instagramID) {
@@ -480,7 +481,6 @@
       this.fnGetTodayMessages()
       this.fnGetRestaurants()
       this.fnGetTodayChoices()
-      this.fnGetLatestChoices()
       this.fnInitDropEvent()
       this.fnGetUsers()
     }

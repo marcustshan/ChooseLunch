@@ -9,9 +9,6 @@ const state = {
 }
 
 const getters = {
-  userInfo: state => {
-    return state.userInfo
-  },
   isLogged: state => {
     return Object.keys(state.userInfo).length > 0
   }

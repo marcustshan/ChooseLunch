@@ -12,10 +12,10 @@
     name: 'common-loading',
     computed: {
       nowLoading () {
-        return this.$store.getters.nowLoading
+        return this.$store.state.common.nowLoading
       },
       showLayerPopup () {
-        return this.$store.getters.showLayerPopup
+        return this.$store.state.common.showLayerPopup
       }
     },
     methods: {

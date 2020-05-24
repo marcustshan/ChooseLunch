@@ -36,7 +36,7 @@
     },
     computed: {
       isLogged () {
-        return this.$store.getters.userInfo && this.$store.getters.userInfo.id
+        return this.$store.getters.isLogged
       }
     },
     methods: {

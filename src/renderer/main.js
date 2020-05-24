@@ -45,7 +45,7 @@ const service = axios.create({
     Accept: 'application/json',
     'Content-type': 'application/json;charset=utf-8'
   },
-  timeout: store.getters.timeout // 요청 제한 시간 (10초)
+  timeout: store.state.common.timeout // 요청 제한 시간 (10초)
 })
 
 // 요청(request) 인터셉터
@@ -95,29 +95,11 @@ Vue.prototype.deepCopy = (target) => {
   return JSON.parse(JSON.stringify(target))
 }
 
-/* 쿠키 관련 함수 */
-Vue.prototype.setCookie = (cookieName, value, days) => {
-  let exdate = new Date()
-  exdate.setDate(exdate.getDate() + days)
-  let cookieValue = escape(value) + ((days == null) ? '' : '; expires=' + exdate.toUTCString())
-  document.cookie = cookieName + '=' + cookieValue
+if (process.env.WEBPACK_DEV_SERVER) {
+  Vue.prototype.$socket = io('http://192.168.0.157:8090')
+} else {
+  Vue.prototype.$socket = io('http://cl.byulsoft.com:8090')
 }
-
-Vue.prototype.getCookie = (cookieName) => {
-  let x, y
-  let val = document.cookie.split(';')
-
-  for (let i = 0; i < val.length; i++) {
-    x = val[i].substr(0, val[i].indexOf('='))
-    y = val[i].substr(val[i].indexOf('=') + 1)
-    x = x.replace(/^\s+|\s+$/g, '') // 앞과 뒤의 공백 제거하기
-    if (x === cookieName) {
-      return unescape(y) // unescape로 디코딩 후 값 리턴
-    }
-  }
-}
-
-Vue.prototype.$socket = io('http://cl.byulsoft.com')
 
 /* eslint-disable no-new */
 window.rootVm = new Vue({

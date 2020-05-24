@@ -23,7 +23,7 @@
     ],
     computed: {
       user () {
-        return this.$store.getters.userInfo
+        return this.$store.state.user.userInfo
       }
     },
     methods: {

@@ -26,7 +26,7 @@
     },
     computed: {
       user () {
-        return this.$store.getters.userInfo
+        return this.$store.state.user.userInfo
       }
     },
     data () {
@@ -60,8 +60,7 @@
         })
         ipcRenderer.on('update_error', (error) => {
           this.updating = false
-          console.log(error)
-          this.alert('업데이트 중 오류가 발생했습니다.\n' + error.toString())
+          console.log('업데이트 중 오류가 발생했습니다.\n' + error)
         })
 
         ipcRenderer.send('check_update')
