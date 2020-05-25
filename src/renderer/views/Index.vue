@@ -56,7 +56,7 @@
       fnLoginByToken () {
         this.$axios.post('/loginByToken', {}).then((response) => {
           if (!response.data) {
-            this.alert('로그인을 해주세요.')
+            console.info('로그인을 해주세요.')
           } else {
             this.$store.dispatch('setUserInfo', response.data)
             this.$router.push('/lunch')

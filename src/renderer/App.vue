@@ -126,6 +126,10 @@
         } else if (e.key === 'F5') {
           require('electron').remote.getCurrentWindow().reload()
         } else if (e.key.toLowerCase() === 's' && e.altKey) {
+          if (this.$socket.disconnected) {
+            this.alert('소켓이 연결되지 않았습니다. 네트워크 및 통신 상태를 확인해주세요.')
+            return
+          }
           if (!this.user.smoker_yn === 'Y') {
             return
           }

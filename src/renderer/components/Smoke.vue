@@ -31,6 +31,11 @@
         this.EventBus.emit('SMOKE_DIM_CLICK')
       },
       fnReply (msg) {
+        if (this.$socket.disconnected) {
+          this.alert('소켓이 연결되지 않았습니다. 네트워크 및 통신 상태를 확인해주세요.')
+          return
+        }
+  
         this.$socket.emit('smokeAnswer', { id: this.user.id, name: this.user.name, msg: msg })
         this.fnClosePopup()
       }

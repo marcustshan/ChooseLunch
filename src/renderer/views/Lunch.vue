@@ -236,6 +236,11 @@
         })
       },
       fnSendImage (imageData) {
+        if (this.$socket.disconnected) {
+          this.alert('소켓이 연결되지 않았습니다. 네트워크 및 통신 상태를 확인해주세요.')
+          return
+        }
+  
         let formData = new FormData()
         let fileName = `${this.user.id}_${this.user.user_seq}_${this.$moment().format('YYYYMMDDHHmmssSSS')}.png`
         formData.append('image', imageData)
@@ -283,6 +288,11 @@
         return returnString
       },
       fnChoose (restaurantSeq, choose) {
+        if (this.$socket.disconnected) {
+          this.alert('소켓이 연결되지 않았습니다. 네트워크 및 통신 상태를 확인해주세요.')
+          return
+        }
+  
         const chooseParam = {
           restaurant_seq: restaurantSeq,
           user_seq: this.user.user_seq,
@@ -324,7 +334,7 @@
       },
       fnSendMessage () {
         if (this.$socket.disconnected) {
-          this.alert('소켓 연결이 끊겼습니다.\n다시 연결되면 새로고침 됩니다.')
+          this.alert('소켓이 연결되지 않았습니다. 네트워크 및 통신 상태를 확인해주세요.')
           return
         }
 

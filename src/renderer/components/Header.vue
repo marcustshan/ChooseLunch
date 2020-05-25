@@ -102,6 +102,11 @@
         this.$store.dispatch('setMenuShow', show)
       },
       fnLogout () {
+        if (this.$socket.disconnected) {
+          this.alert('소켓이 연결되지 않았습니다. 네트워크 및 통신 상태를 확인해주세요.')
+          return
+        }
+  
         this.$socket.emit('logout', this.user)
         this.$store.dispatch('setUserInfo', {})
         this.$store.dispatch('setMenuShow', false)
