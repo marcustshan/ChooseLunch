@@ -1,8 +1,14 @@
 <template>
   <div class="coffee_container">
     <div class="close" @click="fnClosePopup"></div>
-    <button @mouseenter="showCoffeeUsers = true" @mouseleave="showCoffeeUsers = false" class="btn_clipboard" v-if="todayCoffeeChoices && todayCoffeeChoices.length > 0">
-      커피 선택 보기
+    <button
+      @mouseenter="showCoffeeUsers = true"
+      @mouseleave="showCoffeeUsers = false"
+      @click="fnSendCoffeeChoices()"
+      class="btn_clipboard"
+      v-if="todayCoffeeChoices && todayCoffeeChoices.length > 0"
+    >
+      커피 선택 재전송
     </button>
     <div class="coffee_users_container" v-show="showCoffeeUsers">
       <ul class="coffee_user_list">
@@ -36,16 +42,52 @@
           ※ 각 마감 시간 별로 잔디에 자동으로 전송되며, 2차 마감 이후 선택은 주문 시 반영되지 않습니다.
         </p>
       </div>
+      <div>
+        <h2 id="FAVOURITE" class="coffee_category">
+          FAVOURITE
+        </h2>
+        <ul>
+          <li
+            v-for="favCoffee in favouriteCoffees"
+            :class="myCoffeeChoice && myCoffeeChoice.coffee_seq === favCoffee.nItem ? 'selected' : ''"
+            class="coffee_card"
+            v-bind:key="favCoffee.nItem"
+          >
+            <div class="coffee_image">
+              <img :src="favCoffee.sImageUrl" />
+            </div>
+            <div class="coffee_name" v-if="favCoffee.nCharge">
+              {{ favCoffee.sItem }} (￦ {{ favCoffee.nCharge | currency }}원)
+            </div>
+            <div class="card_hot_ice">
+              <button @click="fnChooseCoffee(favCoffee, true, true)" class="btn_hot_ice hot" v-if="!myCoffeeChoice && favCoffee.nIceItemType !== 2">
+                HOT
+              </button>
+              <button @click="fnChooseCoffee(favCoffee, true, false)" class="btn_hot_ice ice" v-if="!myCoffeeChoice && favCoffee.nIceItemType !== 1">
+                ICE
+              </button>
+              <button @click="fnChooseCoffee(favCoffee, false)" class="btn_hot_ice" v-if="myCoffeeChoice && myCoffeeChoice.coffee_seq === favCoffee.nItem">
+                취소
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
       <div v-for="(list, category, index) of coffeeListMap" v-bind:key="index">
         <h2 :id="category" class="coffee_category">
           {{ category }}
         </h2>
         <ul>
-          <li :class="myCoffeeChoice && myCoffeeChoice.coffee_seq === coffee.nItem ? 'selected' : ''" class="coffee_card" v-for="coffee in coffeeListMap[category]" v-bind:key="coffee.nItem">
+          <li
+            v-for="coffee in coffeeListMap[category]"
+            :class="myCoffeeChoice && myCoffeeChoice.coffee_seq === coffee.nItem ? 'selected' : ''"
+            class="coffee_card"
+            v-bind:key="coffee.nItem"
+          >
             <div class="coffee_image">
               <img :src="coffee.sImageUrl" />
             </div>
-            <div class="coffee_name">
+            <div class="coffee_name" v-if="coffee.nCharge">
               {{ coffee.sItem }} (￦ {{ coffee.nCharge | currency }}원)
             </div>
             <div class="card_hot_ice">
@@ -90,6 +132,7 @@
         coffeeListMap: {},
         coffeeList: [],
         categories: [],
+        favouriteCoffees: [],
         selectedCategory: '',
         showCategories: [],
         choices: []
@@ -100,29 +143,7 @@
         return Number.parseInt(price).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,')
       },
       fnSendCoffeeChoices () {
-        let clipboardText = `${this.$moment().format('YYYY년 MM월 DD일 ddd요일')} - ${this.user.name}\n`
-        let priceSum = 0
-        this.todayCoffeeChoices.forEach(choice => {
-          clipboardText += `${choice.name} : ${choice.coffee_name} ${choice.isHot ? 'HOT' : 'ICE'} (${this.fnGetPriceComma(choice.price)})\n`
-          priceSum = priceSum + parseInt(choice.price)
-        })
-        clipboardText += `\n총액 : ${this.fnGetPriceComma(priceSum)}원\n`
-
-        let groupedChoices = this._.groupBy(this.todayCoffeeChoices, choice => {
-          return `${choice.coffee_name} (${choice.isHot ? 'HOT' : 'ICE'})`
-        })
-        let groups = Object.keys(groupedChoices)
-        let totalCoffeeCount = 0
-        groups.forEach(group => {
-          totalCoffeeCount += parseInt(groupedChoices[group].length)
-          clipboardText += `\n${group} : ${groupedChoices[group].length}잔`
-        })
-
-        clipboardText += `\n\n총 ${totalCoffeeCount}잔`
-
-        navigator.clipboard.writeText(clipboardText)
-        // let jandiConnectURL = 'https://wh.jandi.com/connect-api/webhook/19790449/db43a74df6bdbd6364feb571ac2b2506'
-        // this.$axios.post(jandiConnectURL, {'body': clipboardText}).then(response => {})
+        this.$axios.get('/sendCoffeeChoices', {})
       },
       fnInitEvents () {
         this.$socket.off('chosenCoffee')
@@ -175,39 +196,55 @@
           'query': 'MWRQ85AQ0V9VBEJ3GMUJ',
           'params': {'nFCode': 200000}
         }
-        this.$axios.post('https://www.banapresso.com/query', param).then(response => {
-          this.coffeeListMap = this._.groupBy(response.data.rows, (item) => {
-            return item[1]
-          })
-          this.categories = Object.keys(this.coffeeListMap)
+        this.$axios.post('https://www.banapresso.com/query', param).then(coffeeResponse => {
+          const coffeeData = coffeeResponse.data
+          this.$axios.get(`/getCoffeeChoiceCount/${this.user.user_seq}`).then((response) => {
+            const favCoffees = response.data
 
-          this.showCategories = [
-            'COFFEE',
-            'MILK TEA & LATTE',
-            'JUICE & YOGHURT',
-            'BANACCINO & SMOOTHIE',
-            'TEA & ADE'
-          ]
-          this.categories.forEach((category) => {
-            if (!this._.includes(this.showCategories, category)) {
-              delete this.coffeeListMap[category]
-            }
-          })
-          this.coffeeCols = response.data.columns
-          this.showCategories.forEach(category => {
-            this.coffeeList = []
-            this.coffeeListMap[category].forEach(coffeeRow => {
-              let coffeeObj = {}
-              for (let i = 0; i < this.coffeeCols.length; i++) {
-                coffeeObj[`${this.coffeeCols[i].name}`] = coffeeRow[i]
+            this.coffeeListMap = this._.groupBy(coffeeData.rows, (item) => {
+              return item[1]
+            })
+            this.categories = Object.keys(this.coffeeListMap)
+
+            this.showCategories = [
+              'FAVOURITE',
+              'COFFEE',
+              'MILK TEA & LATTE',
+              'JUICE & YOGHURT',
+              'BANACCINO & SMOOTHIE',
+              'TEA & ADE'
+            ]
+            this.categories.forEach((category) => {
+              if (!this._.includes(this.showCategories, category)) {
+                delete this.coffeeListMap[category]
               }
-              this.coffeeList.push(coffeeObj)
+            })
+            this.coffeeCols = coffeeData.columns
+            this.showCategories.forEach(category => {
+              if (!this.coffeeListMap[category] || this.coffeeListMap[category].length < 1) {
+                return true
+              }
+              this.coffeeList = []
+              this.coffeeListMap[category].forEach(coffeeRow => {
+                let coffeeObj = {}
+                for (let i = 0; i < this.coffeeCols.length; i++) {
+                  coffeeObj[`${this.coffeeCols[i].name}`] = coffeeRow[i]
+                }
+                this.coffeeList.push(coffeeObj)
+              })
+
+              this.coffeeListMap[category] = this.deepCopy(this.coffeeList)
             })
 
-            this.coffeeListMap[category] = this.deepCopy(this.coffeeList)
-          })
+            this.favouriteCoffees = []
+            favCoffees.forEach(favCoffee => {
+              const foundFavCoffee = this._.find(this.coffeeListMap[favCoffee.category], { sItemDivision: favCoffee.category, nItem: favCoffee.coffee_seq })
+              this.favouriteCoffees.push(foundFavCoffee)
+            })
+            console.log(this.favouriteCoffees)
 
-          this.fnSelectCategory(this.selectedCategory)
+            this.fnSelectCategory(this.selectedCategory)
+          })
   
           /*
             ESPRESSO
@@ -294,7 +331,7 @@
 </script>
 
 <style scoped>
-  div.coffee_container {width: 80%; height: 80%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 1px solid #ccc; background-color: #fff; z-index: 889;}
+  div.coffee_container {width: 80%; height: 80%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; border: 1px solid #ccc; background-color: #fff; z-index: 889; padding: 20px 0;}
 
   div.my_coffee_container {padding: 10px 10px; font-weight: 600;}
 
