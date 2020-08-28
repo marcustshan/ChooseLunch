@@ -95,14 +95,11 @@ Vue.prototype.deepCopy = (target) => {
   return JSON.parse(JSON.stringify(target))
 }
 
-/*
 if (process.env.WEBPACK_DEV_SERVER) {
   Vue.prototype.$socket = io('http://192.168.0.157:8090')
 } else {
-  Vue.prototype.$socket = io('http://cl.byulsoft.com:8090')
+  Vue.prototype.$socket = io('http://cl.byulsoft.com')
 }
-*/
-Vue.prototype.$socket = io('http://cl.byulsoft.com:8090')
 
 /* eslint-disable no-new */
 window.rootVm = new Vue({
