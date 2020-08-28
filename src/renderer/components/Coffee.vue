@@ -8,7 +8,7 @@
       class="btn_clipboard"
       v-if="todayCoffeeChoices && todayCoffeeChoices.length > 0"
     >
-      커피 선택 재전송
+      커피 선택 전송
     </button>
     <div class="coffee_users_container" v-show="showCoffeeUsers">
       <ul class="coffee_user_list">
