@@ -4,7 +4,7 @@
 
 const state = {
   prod_baseUrl: 'http://cl.byulsoft.com/api',
-  dev_baseUrl: '/api',
+  dev_baseUrl: 'http://cl.byulsoft.com/api',
   timeout: 10000,
   nowLoading: false,
   showLayerPopup: false,
