@@ -46,12 +46,12 @@
         <h2 id="FAVOURITE" class="coffee_category">
           FAVOURITE
         </h2>
-        <ul>
+        <ul v-if="favouriteCoffees && favouriteCoffees.length > 0">
           <li
-            v-for="favCoffee in favouriteCoffees"
-            :class="myCoffeeChoice && myCoffeeChoice.coffee_seq === favCoffee.nItem ? 'selected' : ''"
+            v-for="(favCoffee, favCoffeeIndex) in favouriteCoffees"
+            :class="myCoffeeChoice && (favCoffee.nItem && myCoffeeChoice.coffee_seq === favCoffee.nItem) ? 'selected' : ''"
             class="coffee_card"
-            v-bind:key="favCoffee.nItem"
+            v-bind:key="favCoffeeIndex"
           >
             <div class="coffee_image">
               <img :src="favCoffee.sImageUrl" />
@@ -66,7 +66,7 @@
               <button @click="fnChooseCoffee(favCoffee, true, false)" class="btn_hot_ice ice" v-if="!myCoffeeChoice && favCoffee.nIceItemType !== 1">
                 ICE
               </button>
-              <button @click="fnChooseCoffee(favCoffee, false)" class="btn_hot_ice" v-if="myCoffeeChoice && myCoffeeChoice.coffee_seq === favCoffee.nItem">
+              <button @click="fnChooseCoffee(favCoffee, false)" class="btn_hot_ice" v-if="myCoffeeChoice && (favCoffee.nItem && myCoffeeChoice.coffee_seq === favCoffee.nItem)">
                 취소
               </button>
             </div>
@@ -239,9 +239,10 @@
             this.favouriteCoffees = []
             favCoffees.forEach(favCoffee => {
               const foundFavCoffee = this._.find(this.coffeeListMap[favCoffee.category], { sItemDivision: favCoffee.category, nItem: favCoffee.coffee_seq })
-              this.favouriteCoffees.push(foundFavCoffee)
+              if (foundFavCoffee && Object.keys(foundFavCoffee).length > 0) {
+                this.favouriteCoffees.push(foundFavCoffee)
+              }
             })
-            console.log(this.favouriteCoffees)
 
             this.fnSelectCategory(this.selectedCategory)
           })
